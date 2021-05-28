@@ -1,0 +1,73 @@
+$width: 18em;
+$r-wheel: math.div($width, 2); // rayon roue
+$w-wheel: 1.5em; // épaisseur roue
+$r-sample: 0.5em; // rayon 
+
+.wheel,
+.color{
+    @include grid-center;
+}
+
+.wheel {
+    padding: $r-wheel;
+    grid-area: 1/1;
+    position: relative;
+    border-radius: 50%;
+    background-image: conic-gradient(steps(8));
+    mask-image: radial-gradient(closest-side, #0000 #{$r-wheel - $w-wheel}, #000 calc(#{$r-wheel - $w-wheel} + 1px));
+
+    &::after {
+        position: absolute;
+        content: "";
+        border-radius: inherit;
+        inset: 0;
+        background: #000;
+        opacity: var(--light);
+    }
+}
+
+.color {
+    @include size(($r-wheel - $w-wheel) * math.sqrt(2));
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    grid-area: 1/1;
+    background: hsl(calc(var(--hue-rotation) + 90deg), 100%, 50%);
+
+    &::after {
+        position: absolute;
+        content: "";
+        inset: 0;
+        background-image: linear-gradient(90deg, #ffff, #fff0),
+                          linear-gradient(#0000, #000f);
+        background-blend-mode: hue;
+    }
+}
+
+.sample{
+    padding: $r-sample;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    z-index: 10;
+
+    &-hue{
+        $d: $r-wheel - math.div($w-wheel, 2) + math.div($r-sample, 2);
+        transform-origin: -#{$d - $r-sample} 0.5em;
+        transform: translateX($d) rotate(var(--hue-rotation));
+    }
+}
+
+#light {
+    grid-area: 2/1;
+    width: $width;
+}
+
+#canvas{
+    @include size(11em);
+    box-sizing: border-box;
+
+    &:hover{
+        cursor: crosshair;
+    }
+}
