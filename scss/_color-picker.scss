@@ -4,7 +4,7 @@ $w-wheel: 1.5em; // épaisseur roue
 $r-sample: 0.5em; // rayon 
 
 .wheel,
-.color{
+.color {
     @include grid-center;
 }
 
@@ -40,34 +40,30 @@ $r-sample: 0.5em; // rayon
         content: "";
         inset: 0;
         background-image: linear-gradient(90deg, #ffff, #fff0),
-                          linear-gradient(#0000, #000f);
+            linear-gradient(#0000, #000f);
         background-blend-mode: hue;
     }
 }
 
-.sample{
+.sample {
     padding: $r-sample;
     border: 2px solid #fff;
     border-radius: 50%;
     z-index: 10;
-
-    &-hue{
-        $d: $r-wheel - math.div($w-wheel, 2) + math.div($r-sample, 2);
-        transform-origin: -#{$d - $r-sample} 0.5em;
-        transform: translateX($d) rotate(var(--hue-rotation));
-    }
+    $d: $r-wheel - math.div($w-wheel, 2) + math.div($r-sample, 2);
+    transform-origin: -#{$d - $r-sample} 0.5em;
+    transform: translateX($d) rotate(var(--hue-rotation));
 }
 
-#light {
-    grid-area: 2/1;
-    width: $width;
-}
 
-#canvas{
-    @include size(11em);
-    box-sizing: border-box;
+#canvas {
+    @include size(($r-wheel - $w-wheel) * math.sqrt(2));
+    grid-area: 1/1;
+    place-self: center;
+    background: yellow;
+    z-index: 10;
 
-    &:hover{
+    &:hover {
         cursor: crosshair;
     }
 }
