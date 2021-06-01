@@ -2,95 +2,91 @@ const root = document.documentElement;
 const light = document.querySelector('#light');
 const wheel = document.querySelector('.wheel');
 const hueSample = document.querySelector('.sample');
+const colorSample = document.querySelector('.sample-color');
 const canvas = document.querySelector('#canvas');
 let ctx;
 
-let dragging = false;
-let touch = false;
-let center;
+let hueDragging = false;
+let colorDragging = false;
+let wheelCenter;
+let posSample;
 
-function updateLigthness(l) {
-    root.style.setProperty('--light', l / 100);
-    light.value = l;
-}
-
-function rangeChange(ev) {
-    let l = ev.target.value;
-    updateLigthness(l);
-}
-
-// Touch events
-function hueTouchStartDrag(ev) {
-    touch = true;
-    hueStartDrag(ev);
-}
-
+// Handle Hue selection :
+// - hueStartDrag() -> mousedown event (create event listeners for mousemove & mouseend)
+// - hueMoveDrag() -> mousemove event
+// - hueEndDrag() -> mouseup event (remove event listeners)
 function hueStartDrag(ev) {
-    dragging = true;
-    center = getElementCenter(wheel);
+    hueDragging = true;
     // Attach event listeners for 'mousemove' & 'mouseup'
-    document.body.addEventListener('mousemove', hueDragging);
+    document.body.addEventListener('mousemove', hueMoveDrag);
     document.body.addEventListener('mouseup', hueEndDrag);
-    document.body.addEventListener('touchmove', hueDragging);
-    document.body.addEventListener('touchend', hueEndDrag);
 }
 
 function hueEndDrag() {
-    if (dragging) {
-        document.body.removeEventListener('mousemove', hueDragging);
+    if (hueDragging) {
+        document.body.removeEventListener('mousemove', hueMoveDrag);
         document.body.removeEventListener('mouseup', hueEndDrag);
-        dragging = false;
+        hueDragging = false;
     }
 }
 
-function hueDragging(ev) {
-    if (dragging) {
-        let pos = {};
-        if (touch) {
-            pos = {
-                x: ev.touches[0].clientX,
-                y: ev.touches[0].clientY
-            };
-        } else {
-            pos = {
-                x: ev.clientX,
-                y: ev.clientY
-            };
-        }
-        let angle = Math.round((Math.atan2(pos.y - center.y, pos.x - center.x) * 180) / Math.PI);
+function hueMoveDrag(ev) {
+    if (hueDragging) {
+        let pos = {
+            x: ev.clientX,
+            y: ev.clientY
+        };
+        let angle = Math.round((Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * 180) / Math.PI);
         if (angle < 0) angle += 360;
-        root.style.setProperty('--hue-rotation', `${angle}deg`);
-        // update canvas
-        drawCanvas(`hsl(${angle + 90}, 100%, 50%)`);
+        root.style.setProperty('--hue-rotation', `${angle}deg`); // error without the 'deg' part !!
+        updateCanvas();
     }
 }
 
-function getElementCenter(el) {
-    const rect = el.getBoundingClientRect();
-    return {
-        x: rect.x + rect.width / 2,
-        y: rect.y + rect.height / 2
-    };
+
+// Handle Color selection on the canvas element :
+// - colorStartDrag() -> mousedown event (create event listeners for mousemove & mouseend)
+// - colorMoveDrag() -> mousemove event
+// - colorEndDrag() -> mouseup event (remove event listeners)
+function colorStartDrag(ev) {
+    colorDragging = true;
+    // Attach event listeners for 'mousemove' & 'mouseup'
+    canvas.addEventListener('mousemove', colorMoveDrag);
+    canvas.addEventListener('mouseup', colorEndDrag);
 }
 
-function getPixelPos(ev) {
-    const rect = canvas.getBoundingClientRect();
-    // console.log(rect)
-    console.log(ev)
-    const pos = {
-        x: Math.floor(ev.clientX - rect.left),
-        y: Math.floor(ev.clientY - rect.top)
-    };
-    console.log(pos)
-    // return pos;
-    let n = ((pos.y * rect.width) + pos.x) * 4;
-    let imgDataObj = ctx.getImageData(pos.x, pos.y, 1, 1);
+function colorEndDrag() {
+    if (colorDragging) {
+        canvas.removeEventListener('mousemove', colorMoveDrag);
+        canvas.removeEventListener('mouseup', colorEndDrag);
+        colorDragging = false;
+    }
+}
+
+function colorMoveDrag(ev) {
+    if (colorDragging) {
+        const rect = canvas.getBoundingClientRect();
+        posSample = {
+            x: Math.floor(ev.clientX - rect.left),
+            y: Math.floor(ev.clientY - rect.top)
+        };
+        if (posSample.x < 0) posSample.x = 0;
+        if (posSample.x > rect.width) posSample.x = rect.width;
+        if (posSample.y < 0) posSample.y = 0;
+        if (posSample.y > rect.height) posSample.y = rect.height;
+        updateCanvas();
+    }
+}
+
+function getPixelColor() {
+    let imgDataObj = ctx.getImageData(posSample.x, posSample.y, 1, 1);
     let data = imgDataObj.data;
-    console.log(`rgb(${data[0]}, ${data[1]}, ${data[2]})`);
-    drawCircle(pos);
+    let clr = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+    root.style.setProperty('--color-sample', clr);
+    colorSample.dataset.colorSample = clr;
 }
 
-function drawCircle(pos) {
+function drawCircle() {
     // pos -> {x, y}
     // récupère les infos CSS
     const r = parseInt(window.getComputedStyle(hueSample).paddingLeft);
@@ -100,8 +96,13 @@ function drawCircle(pos) {
     ctx.lineWidth = bdrWidth;
     ctx.globalCompositeOperation = 'source-over';
     ctx.beginPath();
-    ctx.ellipse(pos.x, pos.y, r, r, 0, 0, 2 * Math.PI);
+    ctx.ellipse(posSample.x, posSample.y, r, r, 0, 0, 2 * Math.PI);
     ctx.stroke();
+}
+
+function updateCanvas(){
+    let clr = window.getComputedStyle(canvas).backgroundColor;
+    drawCanvas(clr);
 }
 
 function drawCanvas(clr) {
@@ -124,24 +125,29 @@ function drawCanvas(clr) {
     gradientV.addColorStop(1, 'black');
     ctx.fillStyle = gradientV;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    drawCircle();
+    getPixelColor()
 }
 
 window.addEventListener("load", e => {
+    // Calcule le centre de la roue
+    const rect = wheel.getBoundingClientRect();
+    wheelCenter = {
+        x: rect.x + rect.width / 2,
+        y: rect.y + rect.height / 2
+    };
+
     ctx = canvas.getContext('2d');
     canvas.width = parseInt(window.getComputedStyle(canvas).width);
     canvas.height = parseInt(window.getComputedStyle(canvas).height);
 
     // Récupère la couleur de fond
-    let clr = window.getComputedStyle(canvas).backgroundColor;
-    drawCanvas(clr);
-    let pos = {
+    posSample = {
         x: canvas.width / 2,
         y: canvas.height / 2
     };
-    drawCircle(pos);
-
-    canvas.addEventListener('click', getPixelPos);
-
+    updateCanvas();
+    
     hueSample.addEventListener('mousedown', hueStartDrag);
-    hueSample.addEventListener('touchstart', hueTouchStartDrag);
+    canvas.addEventListener('mousedown', colorStartDrag);
 });

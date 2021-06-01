@@ -13,17 +13,17 @@ $r-sample: 0.5em; // rayon
     grid-area: 1/1;
     position: relative;
     border-radius: 50%;
-    background-image: conic-gradient(steps(8));
+    background-image: conic-gradient(from 90deg, steps(8));
     mask-image: radial-gradient(closest-side, #0000 #{$r-wheel - $w-wheel}, #000 calc(#{$r-wheel - $w-wheel} + 1px));
 
-    &::after {
-        position: absolute;
-        content: "";
-        border-radius: inherit;
-        inset: 0;
-        background: #000;
-        opacity: var(--light);
-    }
+    // &::after {
+    //     position: absolute;
+    //     content: "";
+    //     border-radius: inherit;
+    //     inset: 0;
+    //     background: #000;
+    //     opacity: var(--light);
+    // }
 }
 
 .color {
@@ -33,7 +33,7 @@ $r-sample: 0.5em; // rayon
     left: 50%;
     transform: translate(-50%, -50%);
     grid-area: 1/1;
-    background: hsl(calc(var(--hue-rotation) + 90deg), 100%, 50%);
+    background: hsl(var(--hue-rotation), 100%, 50%);
 
     &::after {
         position: absolute;
@@ -60,10 +60,29 @@ $r-sample: 0.5em; // rayon
     @include size(($r-wheel - $w-wheel) * math.sqrt(2));
     grid-area: 1/1;
     place-self: center;
-    background: yellow;
+    background-color: hsl(var(--hue-rotation), 100%, 50%);
     z-index: 10;
 
     &:hover {
         cursor: crosshair;
+    }
+}
+
+.sample-color {
+    @include size($width, $width/2);
+    position: relative;
+    grid-area: 2/1;
+    background-color: var(--color-sample);
+    border: 1px solid #fff;
+
+    &::after {
+        content: attr(data-color-sample);
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        padding: .4em .8em;
+        color: #fff;
+        border-top-right-radius: .25em;
+        background-color: rgba(0, 0, 0, .75);
     }
 }
