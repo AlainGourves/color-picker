@@ -15,7 +15,7 @@ $r-sample: 0.5em; // rayon
     position: relative;
     border-radius: 50%;
     background-image: conic-gradient(from 90deg, steps(8));
-    mask-image: radial-gradient(closest-side, #0000 #{$r-wheel - $w-wheel}, #000 calc(#{$r-wheel - $w-wheel} + 1px));
+    mask-image: radial-gradient(closest-side, #0000 calc(#{$r-wheel - $w-wheel} - 1px), #000 #{$r-wheel - $w-wheel});
 }
 
 .sample {
@@ -27,7 +27,7 @@ $r-sample: 0.5em; // rayon
     z-index: 10;
     box-shadow: 0px 0px 4px rgba(0,0,0,.75);
     $d: $r-wheel - math.div($w-wheel, 2) + math.div($r-sample, 2);
-    transform-origin: -#{$d - $r-sample} 0.5em;
+    transform-origin: calc(#{$r-sample - $d} + #{$bdr}) calc(#{$r-sample} + #{$bdr});
     transform: translateX($d) rotate(var(--hue-rotation));
 
     &:hover{
@@ -48,15 +48,15 @@ $r-sample: 0.5em; // rayon
     }
 }
 
-.sample-color {
+.picked-color {
     @include size($width, math.div($width, 2));
     position: relative;
     grid-area: 2/1;
-    background-color: var(--color-sample);
+    background-color: var(--color-picked);
     border: 1px solid #fff8;
 
     &::after {
-        content: attr(data-color-sample);
+        content: attr(data-color-picked);
         position: absolute;
         bottom: 0;
         left: 0;

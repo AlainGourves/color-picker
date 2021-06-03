@@ -1,13 +1,9 @@
 const root = document.documentElement;
 const wheel = document.querySelector('.wheel');
 const hueSample = document.querySelector('.sample');
-const colorSample = document.querySelector('.sample-color');
+const colorPicked = document.querySelector('.picked-color');
 const canvas = document.querySelector('#canvas');
 let ctx;
-
-// to know when to update the interface
-let hueDragging = false;
-let colorDragging = false;
 
 // stores the coordinates of the wheel's center (to cumpute the angle of rotation)
 let wheelCenter;
@@ -20,7 +16,6 @@ let posSample;
 // - hueEndDrag() -> mouseup event (remove event listeners)
 function hueStartDrag(ev) {
     ev.preventDefault();
-    hueDragging = true;
     // Attach event listeners for 'mousemove' & 'mouseup'
     // Event listener is attached to body : movements are registered even the pointer exits the target
     customAddEventListener(document.body, 'move', hueMoveDrag);
@@ -28,23 +23,18 @@ function hueStartDrag(ev) {
 }
 
 function hueEndDrag() {
-    if (hueDragging) {
-        customRemoveEventListener(document.body, 'move', hueMoveDrag)
-        customRemoveEventListener(document.body, 'up', hueEndDrag)
-        hueDragging = false;
-    }
+    customRemoveEventListener(document.body, 'move', hueMoveDrag)
+    customRemoveEventListener(document.body, 'up', hueEndDrag)
 }
 
 function hueMoveDrag(ev) {
-    if (hueDragging) {
-        ev.preventDefault();
-        let pos = getPosition(ev);
-        let angle = Math.round((Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * 180) / Math.PI);
-        if (angle < 0) angle += 360;
-        if (angle === -0) angle = 0;
-        root.style.setProperty('--hue-rotation', `${angle}deg`); // error without the 'deg' part !!
-        updateCanvas();
-    }
+    ev.preventDefault();
+    let pos = getPosition(ev);
+    let angle = Math.round((Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * 180) / Math.PI);
+    if (angle < 0) angle += 360;
+    if (angle === -0) angle = 0;
+    root.style.setProperty('--hue-rotation', `${angle}deg`); // error without the 'deg' part !!
+    updateCanvas();
 }
 
 // Handle Color selection on the canvas element :
@@ -53,35 +43,29 @@ function hueMoveDrag(ev) {
 // - colorEndDrag() -> mouseup event (remove event listeners)
 function colorStartDrag(ev) {
     ev.preventDefault();
-    colorDragging = true;
     // Attach event listeners for 'mousemove' & 'mouseup'
     customAddEventListener(document.body, 'move', colorMoveDrag);
     customAddEventListener(document.body, 'up', colorEndDrag);
 }
 
 function colorEndDrag() {
-    if (colorDragging) {
-        customRemoveEventListener(document.body, 'move', colorMoveDrag)
-        customRemoveEventListener(document.body, 'up', colorEndDrag)
-        colorDragging = false;
-    }
+    customRemoveEventListener(document.body, 'move', colorMoveDrag)
+    customRemoveEventListener(document.body, 'up', colorEndDrag)
 }
 
 function colorMoveDrag(ev) {
-    if (colorDragging) {
-        ev.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        let pos = getPosition(ev);
-        posSample = {
-            x: Math.floor(pos.x - rect.left),
-            y: Math.floor(pos.y - rect.top)
-        };
-        if (posSample.x < 0) posSample.x = 0;
-        if (posSample.x > rect.width) posSample.x = rect.width - 1;
-        if (posSample.y < 0) posSample.y = 0;
-        if (posSample.y > rect.height) posSample.y = rect.height - 1;
-        updateCanvas();
-    }
+    ev.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    let pos = getPosition(ev);
+    posSample = {
+        x: Math.floor(pos.x - rect.left),
+        y: Math.floor(pos.y - rect.top)
+    };
+    if (posSample.x < 0) posSample.x = 0;
+    if (posSample.x > rect.width) posSample.x = rect.width - 1;
+    if (posSample.y < 0) posSample.y = 0;
+    if (posSample.y > rect.height) posSample.y = rect.height - 1;
+    updateCanvas();
 }
 
 function getPosition(ev) {
@@ -128,8 +112,8 @@ function getPixelColor() {
     let imgDataObj = ctx.getImageData(posSample.x, posSample.y, 1, 1);
     let data = imgDataObj.data;
     let clr = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
-    root.style.setProperty('--color-sample', clr);
-    colorSample.dataset.colorSample = clr;
+    root.style.setProperty('--color-picked', clr);
+    colorPicked.dataset.colorPicked = clr;
 }
 
 function drawCircle() {
