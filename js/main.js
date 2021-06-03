@@ -19,29 +19,29 @@ let posSample;
 // - hueMoveDrag() -> mousemove event
 // - hueEndDrag() -> mouseup event (remove event listeners)
 function hueStartDrag(ev) {
+    ev.preventDefault();
     hueDragging = true;
     // Attach event listeners for 'mousemove' & 'mouseup'
     // Event listener is attached to body : movements are registered even the pointer exits the target
-    document.body.addEventListener('mousemove', hueMoveDrag);
-    document.body.addEventListener('mouseup', hueEndDrag);
+    customAddEventListener(document.body, 'move', hueMoveDrag);
+    customAddEventListener(document.body, 'up', hueEndDrag);
 }
 
 function hueEndDrag() {
     if (hueDragging) {
-        document.body.removeEventListener('mousemove', hueMoveDrag);
-        document.body.removeEventListener('mouseup', hueEndDrag);
+        customRemoveEventListener(document.body, 'move', hueMoveDrag)
+        customRemoveEventListener(document.body, 'up', hueEndDrag)
         hueDragging = false;
     }
 }
 
 function hueMoveDrag(ev) {
     if (hueDragging) {
-        let pos = {
-            x: ev.clientX,
-            y: ev.clientY
-        };
+        ev.preventDefault();
+        let pos = getPosition(ev);
         let angle = Math.round((Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * 180) / Math.PI);
         if (angle < 0) angle += 360;
+        if (angle === -0) angle = 0;
         root.style.setProperty('--hue-rotation', `${angle}deg`); // error without the 'deg' part !!
         updateCanvas();
     }
@@ -52,32 +52,75 @@ function hueMoveDrag(ev) {
 // - colorMoveDrag() -> mousemove event
 // - colorEndDrag() -> mouseup event (remove event listeners)
 function colorStartDrag(ev) {
+    ev.preventDefault();
     colorDragging = true;
     // Attach event listeners for 'mousemove' & 'mouseup'
-    document.body.addEventListener('mousemove', colorMoveDrag);
-    document.body.addEventListener('mouseup', colorEndDrag);
+    customAddEventListener(document.body, 'move', colorMoveDrag);
+    customAddEventListener(document.body, 'up', colorEndDrag);
 }
 
 function colorEndDrag() {
     if (colorDragging) {
-        document.body.removeEventListener('mousemove', colorMoveDrag);
-        document.body.removeEventListener('mouseup', colorEndDrag);
+        customRemoveEventListener(document.body, 'move', colorMoveDrag)
+        customRemoveEventListener(document.body, 'up', colorEndDrag)
         colorDragging = false;
     }
 }
 
 function colorMoveDrag(ev) {
     if (colorDragging) {
+        ev.preventDefault();
         const rect = canvas.getBoundingClientRect();
+        let pos = getPosition(ev);
         posSample = {
-            x: Math.floor(ev.clientX - rect.left),
-            y: Math.floor(ev.clientY - rect.top)
+            x: Math.floor(pos.x - rect.left),
+            y: Math.floor(pos.y - rect.top)
         };
         if (posSample.x < 0) posSample.x = 0;
         if (posSample.x > rect.width) posSample.x = rect.width - 1;
         if (posSample.y < 0) posSample.y = 0;
         if (posSample.y > rect.height) posSample.y = rect.height - 1;
         updateCanvas();
+    }
+}
+
+function getPosition(ev) {
+    let pos = {};
+    if (ev.targetTouches) {
+        // Touch event
+        pos.x = ev.targetTouches[0].clientX;
+        pos.y = ev.targetTouches[0].clientY;
+    } else {
+        // Mouse or Pointer event
+        pos.x = ev.clientX;
+        pos.y = ev.clientY;
+    }
+    return pos;
+}
+
+function customAddEventListener(el, evt, fct) {
+    if (window.PointerEvent) {
+        // Pointer event listener
+        el.addEventListener(`pointer${evt}`, fct, false);
+    } else {
+        // Touch listener
+        el.addEventListener(`touch${evt}`, fct, false);
+
+        // Mouse listener
+        el.addEventListener(`mouse${evt}`, fct, false);
+    }
+}
+
+function customRemoveEventListener(el, evt, fct) {
+    if (window.PointerEvent) {
+        // Pointer event listener
+        el.removeEventListener(`pointer${evt}`, fct);
+    } else {
+        // Touch listener
+        el.removeEventListener(`touch${evt}`, fct);
+
+        // Mouse listener
+        el.removeEventListener(`mouse${evt}`, fct);
     }
 }
 
@@ -102,7 +145,7 @@ function drawCircle() {
     ctx.stroke();
 }
 
-function updateCanvas(){
+function updateCanvas() {
     let clr = window.getComputedStyle(canvas).backgroundColor;
     // erase canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -145,7 +188,9 @@ window.addEventListener("load", e => {
         y: canvas.height / 2
     };
     updateCanvas();
-    
-    hueSample.addEventListener('mousedown', hueStartDrag);
-    canvas.addEventListener('mousedown', colorStartDrag);
-});
+
+    // hueSample.addEventListener('mousedown', hueStartDrag, false);
+    // canvas.addEventListener('mousedown', colorStartDrag, false);
+    customAddEventListener(hueSample, 'down', hueStartDrag);
+    customAddEventListener(canvas, 'down', colorStartDrag);
+}, false);
