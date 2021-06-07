@@ -2,3 +2,141 @@
 @import 'mixins';
 @import 'base';
 @import 'color-picker';
+
+#swatches {
+    position: relative;
+    width: 80vw;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 160px);
+    justify-content: center;
+    gap: .8em;
+}
+
+.swatch {
+    height: 160px;
+    border-top-left-radius: 2em;
+    border-bottom-right-radius: 2em;
+    position: relative;
+    transform: scale(1);
+    transition: transform .5s cubic-bezier(0.5, -0.5, 0.75, 1.5);
+
+    &.cleared{
+        transform: scale(0);
+    }
+
+    &:hover {
+        --note-clr: #cf3;
+        --arrow: 8px;
+        &::before {
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            top: calc(85% - var(--arrow));
+            left: 12.5%;
+            z-index: 1;
+            border-style: solid;
+            border-width: 0 var(--arrow) var(--arrow) var(--arrow);
+            border-color: transparent transparent var(--note-clr) transparent;
+        }
+
+        &::after {
+            position: absolute;
+            content: attr(data-bg-color);
+            top: 85%;
+            left: 5%;
+            font-size: .8em;
+            color: #000;
+            padding: .4em .8em;
+            background-color: var(--note-clr);
+            border-radius: .125em;
+            z-index: 2;
+        }
+    }
+
+    .btns {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 26px;
+        height: 68px;
+        display: grid;
+        justify-content: center;
+        align-content: space-around;
+        background-color: rgba(0, 0, 0, .5);
+        border-bottom-left-radius: .25em;
+
+        & button {
+            width: 18px;
+            height: 18px;
+            appearance: none;
+            border: 0;
+            background-color: transparent;
+
+            &.drag{
+                cursor: move;
+            }
+
+            & svg{
+                fill: hotpink;
+                width: 18px;
+                height: 18px;
+                
+                &:hover{
+                    fill: deepskyblue;
+                }
+                
+                &:active{
+                    // important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
+                    pointer-events: none;
+                }
+            }
+        }
+    }
+}
+
+button {
+    cursor: pointer;
+    appearance: none;
+}
+
+.hidden{
+    // hidden input used by (copy) toClipboard() function 
+    position: absolute;
+    left: -100vw;
+}
+
+.copyList{
+    background-color: deepskyblue;
+    width: 100%;
+    height: auto;
+    display: none;
+    position: absolute;
+    bottom: -3em;
+}
+
+.swatch ~ .copyList{
+    // visible only if there is at least a .swatch
+    display: block;
+}
+
+.over{
+    border: 4px dashed #444;
+    background-color: #777 !important;
+    box-sizing: border-box;
+
+    &::after{
+        position: absolute;
+        inset: 0;
+        content: 'Drop Zone';
+        @include grid-center;
+        font-family: sans-serif;
+        font-weight: 600;
+        font-size: 1.5em;
+        color: #fff4;
+    }
+
+    & .btns{
+        display: none;
+    }
+}

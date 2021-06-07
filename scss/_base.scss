@@ -17,7 +17,7 @@ html {
 }
 
 body {
-  height: 100vh;
+  min-height: 100vh;
   @include grid-center;
   gap: 2em;
   background: hsl(220, 4.5%, 26.3%);
