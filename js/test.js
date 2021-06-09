@@ -8,7 +8,7 @@ function addDiv(ev) {
 
     clone.style.backgroundColor = color;
 
-    swatchesContainer.insertBefore(clone, swatchesContainer.querySelector('.copyList'));
+    swatchesContainer.insertBefore(clone, swatchesContainer.querySelector('.toolbar'));
     compteur++;
 }
 
@@ -16,10 +16,9 @@ function getSwatch(ev) {
     // get the parent .swatch from the clicked button
     if (ev.target.classList.contains('btn')) {
         let swatch = ev.target.parentNode.parentNode;
-        if (ev.target.classList.contains('cleared')) {
+        if (ev.target.classList.contains('clear')) {
             swatch.classList.add('cleared');
             swatch.addEventListener('transitionend', e => {
-                console.log(this)
                 swatch.remove();
             }, false);
         } else if (ev.target.classList.contains('copy')) {
@@ -29,10 +28,20 @@ function getSwatch(ev) {
     }
 }
 
-async function toClipboard(code) {
+async function toClipboard(src) {
+    let message;
+    let type = typeof(src);
+    if (type === 'string'){
+        // single color
+        message = "Color copied to clipboard";
+    }else{
+        // list of colors
+        src = src.join(', ');
+        message = "List of colors copied to clipboard";
+    }
     if (navigator.clipboard) {
         try {
-            await navigator.clipboard.writeText(code);
+            await navigator.clipboard.writeText(src);
         } catch (err) {
             console.error('Failed to copy: ', err);
         }
@@ -41,7 +50,7 @@ async function toClipboard(code) {
         const pasteboard = document.createElement('input');
         pasteboard.setAttribute('readonly', 'readonly');
         pasteboard.className = 'hidden';
-        pasteboard.value = code;
+        pasteboard.value = src;
         document.body.appendChild(pasteboard);
         // save & restore user's selection
         const selected = (document.getSelection().rangeCount > 0) ? document.getSelection().getRangeAt(0) : false;
@@ -53,15 +62,16 @@ async function toClipboard(code) {
             document.getSelection().addRange(selected);
         }
     }
+    notif(message);
 }
 
-function exportColorList(e) {
+function exportColorList() {
     const sw = swatchesContainer.querySelectorAll('.swatch');
     let list = [];
     sw.forEach(e => {
         list.push(e.dataset.bgColor);
     });
-    console.log(list.join(', '));
+    toClipboard(list);
 }
 
 function handleDragEnd(e) {
@@ -85,7 +95,6 @@ function handleDragEnter(e) {
 function handleDragOver(e) {
     // necessary to make the drop event possible !!
     e.preventDefault();
-    // return false;
 }
 
 function handleDragLeave(e) {
@@ -134,3 +143,15 @@ window.addEventListener("load", e => {
     swatchesContainer.addEventListener('click', getSwatch, false);
     copyList.addEventListener('click', exportColorList, false);
 });
+
+function notif(message){
+    const notif = document.querySelector('.notif');
+    notif.innerText = message;
+    notif.classList.add('visible');
+    notif.addEventListener('transitionend', notifUp, false)
+}
+
+function notifUp() {
+    this.classList.remove('visible');
+    this.removeEventListener('transitionend', notifUp);
+}

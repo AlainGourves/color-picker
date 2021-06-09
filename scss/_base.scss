@@ -10,6 +10,7 @@
     --fondPage:hsl(45, 21%, 93%);
     --hue-rotation: 0deg;
     --color-picked: hsl(0,100%,50%);
+    --swatch-size: 140px;
 }
   
 html {
@@ -36,4 +37,9 @@ nav ul {
 ul a {
   text-decoration: none;
   display: inline-block;
+}
+
+button {
+  cursor: pointer;
+  appearance: none;
 }
