@@ -69,7 +69,17 @@ function colorMoveDrag(ev) {
     updateCanvas();
 }
 
+function getWheelCenter(){
+    // Compute the coordinates of the wheel's center
+    const rect = wheel.getBoundingClientRect();
+    wheelCenter = {
+        x: rect.x + rect.width / 2,
+        y: rect.y + rect.height / 2
+    };
+}
+
 function getPosition(ev) {
+    getWheelCenter();
     let pos = {};
     if (ev.targetTouches) {
         // Touch event
@@ -80,6 +90,7 @@ function getPosition(ev) {
         pos.x = ev.clientX;
         pos.y = ev.clientY;
     }
+    // console.log(pos.x, pos.y)
     return pos;
 }
 
@@ -115,6 +126,9 @@ function getPixelColor() {
     let clr = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
     root.style.setProperty('--color-picked', clr);
     colorPicked.dataset.colorPicked = clr;
+    colorPicked.dataset.angle = root.style.getPropertyValue('--hue-rotation');
+    colorPicked.dataset.canvasX = posSample.x;
+    colorPicked.dataset.canvasY = posSample.y;
 }
 
 function drawCircle() {
@@ -217,12 +231,22 @@ function swatchesDragHandle(e) {
 function addSwatch(ev) {
     const template = document.getElementById('tmpl_swatch');
     const clone = template.content.firstElementChild.cloneNode(true);
-
-    let color = colorPicked.dataset.colorPicked;
-    clone.dataset.bgColor = color;
-    clone.style.backgroundColor = color;
-
+    clone.dataset.bgColor = colorPicked.dataset.colorPicked;
+    clone.dataset.angle = colorPicked.dataset.angle;
+    clone.dataset.canvasX = colorPicked.dataset.canvasX;
+    clone.dataset.canvasY = colorPicked.dataset.canvasY;
+    clone.style.backgroundColor = colorPicked.dataset.colorPicked;
     swatchesContainer.insertBefore(clone, swatchesContainer.querySelector('.copyList'));
+}
+
+function loadSwatch(swatch){
+    let angle = swatch.dataset.angle;
+    root.style.setProperty('--hue-rotation', angle);
+    posSample.x = swatch.dataset.canvasX;
+    posSample.y = swatch.dataset.canvasY;
+    hueSample.classList.add('load-swatch');
+    updateCanvas();
+    hueSample.classList.remove('load-swatch');
 }
 
 function getSwatch(ev) {
@@ -235,8 +259,10 @@ function getSwatch(ev) {
                 swatch.remove();
             }, false);
         } else if (ev.target.classList.contains('copy')) {
-            let hex = swatch.dataset.bgColor;
-            toClipboard(hex);
+            let clr = swatch.dataset.bgColor;
+            toClipboard(clr);
+        } else if (ev.target.classList.contains('load')) {
+            loadSwatch(swatch);
         }
     }
 }
@@ -302,12 +328,8 @@ function notifUp() {
 
 // ----------------------------------------------Page Load
 window.addEventListener("load", e => {
-    // Compute the coordinates of the wheel's center
-    const rect = wheel.getBoundingClientRect();
-    wheelCenter = {
-        x: rect.x + rect.width / 2,
-        y: rect.y + rect.height / 2
-    };
+    
+    getWheelCenter();
 
     ctx = canvas.getContext('2d');
     canvas.width = parseInt(window.getComputedStyle(canvas).width);

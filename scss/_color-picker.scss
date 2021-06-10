@@ -62,6 +62,10 @@ $r-sample: 0.5em; // rayon
     &:hover {
         cursor: pointer;
     }
+
+    &.load-swatch {
+        transition: transform .5s ease-in-out;
+    }
 }
 
 
@@ -96,11 +100,28 @@ $r-sample: 0.5em; // rayon
     }
 }
 
-.info{
+.info {
     font-family: sans-serif;
     font-weight: 400;
     color: #fffb;
 }
+
+button {
+    appearance: none;
+    border: 0;
+    background-color: transparent;
+
+    & svg {
+        fill: hotpink;
+        width: 100%;
+        height: 100%;
+
+        &:hover {
+            fill: deepskyblue;
+        }
+    }
+}
+
 /* ------------------- Color swatches -- */
 
 #swatches {
@@ -122,7 +143,7 @@ $r-sample: 0.5em; // rayon
     transform: scale(1);
     transition: transform .5s cubic-bezier(0.5, -0.5, 0.75, 1.5);
 
-    &::after {
+    &:not(.over)::after {
         position: absolute;
         content: attr(data-bg-color);
         width: 100%;
@@ -137,7 +158,7 @@ $r-sample: 0.5em; // rayon
         opacity: 0;
         transform: translateX(100%);
         transition: transform .25s ease-in-out,
-                    opacity .25s linear;
+            opacity .25s linear;
     }
 
     &.cleared {
@@ -170,61 +191,98 @@ $r-sample: 0.5em; // rayon
             display: none;
         }
     }
+}
 
-    .btns {
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 26px;
-        height: 52px;
-        display: grid;
-        justify-content: center;
-        align-content: space-around;
-        background-color: rgba(0, 0, 0, .5);
-        border-bottom-left-radius: .25em;
+.btns {
+    $btn-width: 24px;
+    position: absolute;
+    width: $btn-width * 2;
+    height: $btn-width * 3;
+    top: 0;
+    right: $btn-width * -1;
+    display: grid;
+    grid-template-columns: $btn-width $btn-width;
 
-        & button {
-            width: 18px;
-            height: 18px;
-            appearance: none;
-            border: 0;
-            background-color: transparent;
+    &:focus-within {
+        & button:nth-child(1) {
+            grid-area: 1/2;
+        }
 
-            & svg {
-                fill: hotpink;
-                width: 18px;
-                height: 18px;
+        & button:nth-child(2) {
+            grid-area: 1/1;
+        }
 
-                &:hover {
-                    fill: deepskyblue;
-                }
+        & button:nth-child(3) {
+            grid-area: 2/1;
+        }
 
-                &:active {
-                    // important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
-                    pointer-events: none;
-                }
-            }
+        & button:nth-child(4) {
+            grid-area: 3/1;
+        }
+    }
+
+    & button {
+        position: relative;
+        @include grid-center;
+
+        &:nth-child(1)::after,
+        &:nth-child(4)::after {
+            position: absolute;
+            content: '';
+            width: 100%;
+            height: calc(#{$btn-width} + .5em);
+            top: 0;
+            background-color: rgba(0, 0, 0, .5);
+            border-bottom-left-radius: 1em;
+            z-index: -1;
+        }
+
+        &:nth-child(1) {
+            grid-area: 1/1;
+        }
+
+        &:nth-child(2) {
+            grid-area: 1/2;
+            background-color: rgba(0, 0, 0, .5);
+        }
+
+        &:nth-child(3) {
+            grid-area: 2/2;
+            background-color: rgba(0, 0, 0, .5);
+        }
+
+        &:nth-child(4) {
+            grid-area: 3/2;
+        }
+    }
+
+    & svg {
+        @include size(#{$btn-width - 6px});
+
+        &:active {
+            // important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
+            pointer-events: none;
         }
     }
 }
 
+
 .copyList {
     grid-column: 1/-1;
-    background-color: deepskyblue;
     height: auto;
     display: none;
 
-    & button{
-        margin-left: auto;
+    & button {
+        @include size(2em);
     }
 }
 
 .swatch~.copyList {
-    // visible only if there is at least a .swatch
+    // visible only if there is at least one .swatch
     display: block;
 }
 
-.notif{
+.notif {
     $h: 3em;
     min-width: 15vw;
     height: $h;
@@ -232,17 +290,17 @@ $r-sample: 0.5em; // rayon
     bottom: 0;
     left: 50%;
     @include grid-center;
-    transform: translateX(-50%)  translateY($h);
+    transform: translateX(-50%) translateY($h);
     transition-property: transform;
     transition-duration: .125s;
     transition-delay: 3s;
     transition-timing-function: ease-in-out;
-    background-color: rgba(0,0,0,.5);
+    background-color: rgba(0, 0, 0, .5);
     border-top-left-radius: .25em;
     border-top-right-radius: .25em;
     padding: 0 2.5em;
-    
-    &.visible{
+
+    &.visible {
         transform: translateX(-50%) translateY(0);
         transition-duration: .5s;
         transition-delay: 0s;
@@ -250,7 +308,7 @@ $r-sample: 0.5em; // rayon
 }
 
 .hidden {
-    // hidden input used by (copy) toClipboard() function 
+    // hidden input used by toClipboard() function 
     position: absolute;
     left: -100vw;
 }
