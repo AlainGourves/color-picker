@@ -2,7 +2,7 @@ const root = document.documentElement;
 const wheel = document.querySelector('.wheel');
 const hueSample = document.querySelector('.sample');
 const colorPicked = document.querySelector('.picked-color');
-const btnNewSwatch = document.querySelector('#color__container > button');
+const btnNewSwatch = document.querySelector('#wheel__container > button');
 const canvas = document.querySelector('#canvas');
 let ctx;
 
@@ -133,7 +133,7 @@ function getPixelColor() {
 
 function drawCircle() {
     // récupère les infos CSS
-    const r = parseInt(window.getComputedStyle(hueSample).paddingLeft) * 0.75;
+    const r = Math.floor(parseInt(window.getComputedStyle(hueSample).width) * .5);
     const bdrWidth = parseInt(window.getComputedStyle(hueSample).borderLeftWidth);
     const bdrColor = window.getComputedStyle(hueSample).borderLeftColor;
     ctx.strokeStyle = bdrColor;
@@ -275,7 +275,8 @@ async function toClipboard(src) {
         message = "Color copied to clipboard";
     }else{
         // list of colors
-        src = src.join(', ');
+        // src = src.join(', ');
+        src = src.join('\n');
         message = "List of colors copied to clipboard";
     }
     if (navigator.clipboard) {

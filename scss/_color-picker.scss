@@ -1,6 +1,6 @@
 $width: 18em;
 $r-wheel: math.div($width, 2); // rayon roue
-$w-wheel: 1.5em; // épaisseur roue
+$w-wheel: 2em; // épaisseur roue
 $r-sample: 0.5em; // rayon 
 
 #color-picker {
@@ -21,6 +21,14 @@ $r-sample: 0.5em; // rayon
 
 #wheel__container {
     grid-area: 1/1;
+    position: relative;
+    
+        button {
+            position: absolute;
+            @include size(2.5em);
+            bottom: 0;
+            right: 0;
+        }
 }
 
 #color__container {
@@ -30,34 +38,30 @@ $r-sample: 0.5em; // rayon
     &>* {
         grid-area: 1/1;
     }
-
-    button {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-    }
 }
 
 .wheel {
-    padding: $r-wheel;
-    grid-area: 1/1;
     position: relative;
+    @include size($width);
+    grid-area: 1/1;
     border-radius: 50%;
     background-image: conic-gradient(from 90deg, steps(8));
     mask-image: radial-gradient(closest-side, #0000 calc(#{$r-wheel - $w-wheel} - 1px), #000 #{$r-wheel - $w-wheel});
 }
 
 .sample {
-    $bdr: 2px;
-    touch-action: none;
-    padding: $r-sample;
-    border: $bdr solid #fff;
+    box-sizing: border-box;
+    @include size(#{$r-sample * 2});
+    position: absolute;
+    top: calc(50% - #{$r-sample});
+    left: calc(100% - #{math.div($w-wheel, 2) + $r-sample});
+    transform-origin: (($r-wheel - (math.div($w-wheel,2) + $r-sample)) * -1) #{$r-sample};
+    transform: rotate(var(--hue-rotation));
+    border: 2px solid #fff;
     border-radius: 50%;
     z-index: 10;
     box-shadow: 0px 0px 4px rgba(0, 0, 0, .75);
-    $d: $r-wheel - math.div($w-wheel, 2) + math.div($r-sample, 2);
-    transform-origin: calc(#{$r-sample - $d} + #{$bdr}) calc(#{$r-sample} + #{$bdr});
-    transform: translateX($d) rotate(var(--hue-rotation));
+    touch-action: none;
 
     &:hover {
         cursor: pointer;
@@ -178,8 +182,8 @@ button {
 
         &::before {
             position: absolute;
-            inset: 0;
             content: 'Drop Me!';
+            @include inset0;
             @include grid-center;
             font-family: sans-serif;
             font-weight: 600;
@@ -232,6 +236,7 @@ button {
             width: 100%;
             height: calc(#{$btn-width} + .5em);
             top: 0;
+            left: 0;
             background-color: rgba(0, 0, 0, .5);
             border-bottom-left-radius: 1em;
             z-index: -1;
