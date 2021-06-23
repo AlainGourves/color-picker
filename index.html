@@ -15,10 +15,10 @@
                 <div class="sample"></div>
             </div>
             <canvas id="canvas"></canvas>
-            <button>
-                <svg role="img" class="svg-icon">
-                    <title>Save this color</title>
-                    <use xlink:href="#tray-down" />
+            <button role="button" aria-label="Save this color">
+                <svg role="img" class="svg-icon" aria-labelledby="desc">
+                    <desc>Click to save this color to an individual swatch</desc>
+                    <use xlink:href="/img/icons-sprite.svg#icon-tray-down" />
                 </svg>
             </button>
         </div>
@@ -31,10 +31,11 @@
 
     <section id="swatches">
         <div class="copyList">
-            <button>
-                <svg role="img" class="svg-icon">
-                    <title>Copy colors' list to clipboard</title>
-                    <use xlink:href="#clipboard" />
+            <button role="button" aria-label="Copy colors' list to clipboard">
+                Copy to clipboard
+                <svg role="img" class="svg-icon" aria-labelledby="desc">
+                    <desc>Copy colors' list to clipboard</desc>
+                    <use xlink:href="/img/icons-sprite.svg#icon-clipboard" />
                 </svg>
             </button>
         </div>
@@ -45,55 +46,33 @@
     <template id="tmpl_swatch">
         <article class="swatch info" draggable="true">
             <div class="btns">
-                <button class="btn cog">
-                    <svg role="img" class="svg-icon">
-                        <title>Options</title>
-                        <use xlink:href="#cog" />
+                <button class="btn cog" role="button" aria-label="Options">
+                    <svg role="img" class="svg-icon" aria-labelledby="desc">
+                        <desc id="desc">Options</desc>
+                        <use xlink:href="/img/icons-sprite.svg#icon-cog" />
                     </svg>
                 </button>
-                <button class="btn load">
-                    <svg role="img" class="svg-icon">
-                        <title>Load this color</title>
-                        <use xlink:href="#tray-up" />
+                <button class="btn load" role="button" aria-label="Load color">
+                    <svg role="img" class="svg-icon" aria-labelledby="desc">
+                        <desc id="desc">Load this color in the color picker</desc>
+                        <use xlink:href="/img/icons-sprite.svg#icon-tray-up" />
                     </svg>
                 </button>
-                <button class="btn copy">
-                    <svg role="img" class="svg-icon">
-                        <title>Copy to clipboard</title>
-                        <use xlink:href="#clipboard" />
+                <button class="btn copy" role="button" aria-label="Copy to clipboard">
+                    <svg role="img" class="svg-icon" aria-labelledby="desc">
+                        <desc id="desc">Copy the RGB values of current color to the clipboard</desc>
+                        <use xlink:href="/img/icons-sprite.svg#icon-clipboard" />
                     </svg>
                 </button>
-                <button class="btn clear">
-                    <svg role="img" class="svg-icon">
-                        <title>Delete this color</title>
-                        <use xlink:href="#trashcan" />
+                <button class="btn clear" role="button" aria-label="Delete color">
+                    <svg role="img" class="svg-icon" aria-labelledby="desc">
+                        <desc id="desc">Delete this color swatch</desc>
+                        <use xlink:href="/img/icons-sprite.svg#icon-trashcan" />
                     </svg>
                 </button>
             </div>
         </article>
     </template>
-    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="display:none">
-        <symbol id="cog" viewBox="0 0 24 24">
-            <path
-                d="M12,8a4,4,0,1,1-4,4,4,4,0,0,1,4-4m0,2a2,2,0,1,0,2,2,2,2,0,0,0-2-2M10,22a.51.51,0,0,1-.5-.42l-.37-2.65a7,7,0,0,1-1.69-1L4.95,19a.5.5,0,0,1-.61-.22l-2-3.46a.49.49,0,0,1,.12-.64L4.57,13,4.5,12l.07-1L2.46,9.37a.49.49,0,0,1-.12-.64l2-3.46a.49.49,0,0,1,.61-.22l2.49,1a7.25,7.25,0,0,1,1.69-1L9.5,2.42A.51.51,0,0,1,10,2h4a.51.51,0,0,1,.5.42l.37,2.65a7.25,7.25,0,0,1,1.69,1l2.49-1a.49.49,0,0,1,.61.22l2,3.46a.49.49,0,0,1-.12.64L19.43,11l.07,1-.07,1,2.11,1.63a.49.49,0,0,1,.12.64l-2,3.46A.49.49,0,0,1,19,19l-2.49-1a7.25,7.25,0,0,1-1.69,1l-.37,2.65A.51.51,0,0,1,14,22H10M11.25,4l-.37,2.61a5.49,5.49,0,0,0-3,1.78l-2.41-1-.75,1.3L6.8,10.2a5.55,5.55,0,0,0,0,3.6L4.68,15.36l.75,1.3,2.43-1a5.44,5.44,0,0,0,3,1.76L11.24,20h1.52l.37-2.61a5.52,5.52,0,0,0,3-1.77l2.43,1,.75-1.3L17.2,13.81a5.58,5.58,0,0,0,0-3.61l2.11-1.55-.75-1.3-2.41,1a5.42,5.42,0,0,0-3-1.77L12.75,4Z" />
-        </symbol>
-        <symbol id="tray-up" viewBox="0 24 24 24">
-            <path
-                d="M2,36H4v5H20V36h2v5a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V36M12,26,6.46,31.46l1.42,1.42L11,29.75V39h2V29.75l3.13,3.13,1.42-1.43Z" />
-        </symbol>
-        <symbol id="tray-down" viewBox="0 48 24 24">
-            <path
-                d="M2,60H4v5H20V60h2v5a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V60m10,3,5.55-5.46-1.42-1.41L13,59.25V50H11v9.25L7.88,56.13,6.46,57.55Z" />
-        </symbol>
-        <symbol id="clipboard" viewBox="0 72 24 24">
-            <path
-                d="M19,75a2,2,0,0,1,2,2V91a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2V77a2,2,0,0,1,2-2H9.18a3,3,0,0,1,5.64,0H19m-7,0a1,1,0,1,0,1,1,1,1,0,0,0-1-1M7,79V77H5V91H19V77H17v2H7m5,11L7,85h3V81h4v4h3Z" />
-        </symbol>
-        <symbol id="trashcan" viewBox="0 96 24 24">
-            <path
-                d="M9,99v1H4v2H5v13a2,2,0,0,0,2,2H17a2,2,0,0,0,2-2V102h1v-2H15V99H9m-2,3H17v13H7V102m2,2v9h2v-9H9m4,0v9h2v-9Z" />
-        </symbol>
-    </svg>
     <script src="./js/main.js" defer></script>
 </body>
 

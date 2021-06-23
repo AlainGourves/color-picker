@@ -261,7 +261,7 @@ button {
         }
     }
 
-    & svg {
+    & .svg-icon {
         @include size(#{$btn-width - 6px});
 
         &:active {
@@ -278,6 +278,14 @@ button {
     display: none;
 
     & button {
+        display: flex;
+        align-items: center;
+        gap: .25em;
+        padding: .25em .5em;
+        background-color: rebeccapurple;
+    }
+
+    & .svg-icon {
         @include size(2em);
     }
 }
