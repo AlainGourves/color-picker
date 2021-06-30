@@ -22,13 +22,13 @@ $r-sample: 0.5em; // rayon
 #wheel__container {
     grid-area: 1/1;
     position: relative;
-    
-        button {
-            position: absolute;
-            @include size(2.5em);
-            bottom: 0;
-            right: 0;
-        }
+
+    button {
+        position: absolute;
+        @include size(2.5em);
+        bottom: 0;
+        right: 0;
+    }
 }
 
 #color__container {
@@ -49,13 +49,14 @@ $r-sample: 0.5em; // rayon
     mask-image: radial-gradient(closest-side, #0000 calc(#{$r-wheel - $w-wheel} - 1px), #000 #{$r-wheel - $w-wheel});
 }
 
+// circle to sample hue on the color wheel
 .sample {
     box-sizing: border-box;
     @include size(#{$r-sample * 2});
     position: absolute;
     top: calc(50% - #{$r-sample});
     left: calc(100% - #{math.div($w-wheel, 2) + $r-sample});
-    transform-origin: (($r-wheel - (math.div($w-wheel,2) + $r-sample)) * -1) #{$r-sample};
+    transform-origin: (($r-wheel - (math.div($w-wheel, 2) + $r-sample)) * -1) #{$r-sample};
     transform: rotate(var(--hue-rotation));
     border: 2px solid #fff;
     border-radius: 50%;
@@ -85,6 +86,7 @@ $r-sample: 0.5em; // rayon
     }
 }
 
+// Actual selected color
 .picked-color {
     @include size(($r-wheel - $w-wheel) * math.sqrt(2));
     position: relative;
@@ -127,7 +129,6 @@ button {
 }
 
 /* ------------------- Color swatches -- */
-
 #swatches {
     position: relative;
     width: 80vw;
@@ -135,27 +136,37 @@ button {
     grid-template-columns: repeat(auto-fill, var(--swatch-size));
     gap: .8em;
     padding-bottom: 3em;
-    overflow: hidden;
+    // overflow: hidden;
 }
 
 .swatch {
+    $radius: 2em;
     height: var(--swatch-size);
-    border-top-left-radius: 2em;
-    border-bottom-right-radius: 2em;
+    border-top-left-radius: $radius;
+    border-bottom-right-radius: $radius;
     position: relative;
-    overflow: hidden;
+    // overflow: hidden;
     transform: scale(1);
     transition: transform .5s cubic-bezier(0.5, -0.5, 0.75, 1.5);
+    z-index: auto;
 
+    &:focus-within,
+    &:hover {
+        // make sure that the btns' tooltips are not hidden behind the other swatches
+        z-index: 10;
+    }
+
+    // display color RGB values
+    // but not when the swatch is dragged
     &:not(.over)::after {
         position: absolute;
         content: attr(data-bg-color);
         width: 100%;
-        height: 2em;
+        height: $radius;
         bottom: 0;
         left: 0;
         @include grid-center;
-        border-top-left-radius: 2em;
+        border-top-left-radius: $radius;
         font-size: .8em;
         background-color: rgba(0, 0, 0, .5);
         z-index: 1;
@@ -170,6 +181,7 @@ button {
     }
 
     &:hover:not(.over)::after {
+        // display rgb values on hover
         transform: translateX(0);
         opacity: 1;
     }
@@ -191,87 +203,127 @@ button {
             color: #fff4;
         }
 
+        // swatch's buttons are masked when dragging
         & .btns {
             display: none;
         }
     }
 }
 
+// Swatch buttons columns
+// 2 columns, only one displayed at the time
+$btn-width: 24px;
+
 .btns {
-    $btn-width: 24px;
     position: absolute;
-    width: $btn-width * 2;
-    height: $btn-width * 3;
+    width: $btn-width;
+    // height: $btn-width * 3;
     top: 0;
-    right: $btn-width * -1;
+    right: 0;
     display: grid;
-    grid-template-columns: $btn-width $btn-width;
 
     &:focus-within {
-        & button:nth-child(1) {
-            grid-area: 1/2;
+        & .btn__col:nth-child(1) {
+            opacity: 0;
+            visibility: hidden;
         }
-
-        & button:nth-child(2) {
-            grid-area: 1/1;
-        }
-
-        & button:nth-child(3) {
-            grid-area: 2/1;
-        }
-
-        & button:nth-child(4) {
-            grid-area: 3/1;
+        
+        & .btn__col:nth-child(2) {
+            opacity: 1;
+            visibility: visible;
         }
     }
+    
+    & .btn__col {
+        grid-area: 1/1;
+        height: max-content;
+        padding-bottom: .5em;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        border-bottom-left-radius: 1em;
+        background-color: rgba(0, 0, 0, .5);
+        transition: opacity .25s ease-in-out;
 
-    & button {
-        position: relative;
-        @include grid-center;
-
-        &:nth-child(1)::after,
-        &:nth-child(4)::after {
-            position: absolute;
-            content: '';
-            width: 100%;
-            height: calc(#{$btn-width} + .5em);
-            top: 0;
-            left: 0;
-            background-color: rgba(0, 0, 0, .5);
-            border-bottom-left-radius: 1em;
-            z-index: -1;
-        }
 
         &:nth-child(1) {
-            grid-area: 1/1;
+            opacity: 1;
+            visibility: visible;
         }
-
+        
         &:nth-child(2) {
-            grid-area: 1/2;
-            background-color: rgba(0, 0, 0, .5);
-        }
-
-        &:nth-child(3) {
-            grid-area: 2/2;
-            background-color: rgba(0, 0, 0, .5);
-        }
-
-        &:nth-child(4) {
-            grid-area: 3/2;
+            opacity: 0;
+            visibility: hidden;
         }
     }
+    & .btn {
+        @include size($btn-width);
 
-    & .svg-icon {
-        @include size(#{$btn-width - 6px});
-
-        &:active {
-            // important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
-            pointer-events: none;
+        // Tooltips for the buttons
+        $arrow: 6px;
+        $offset: .5em;
+        $tooltip-bg: rgb(49, 49, 49);
+        --tooltip-bg: #{$tooltip-bg};
+        position: relative;
+        
+        &::before,
+        &::after {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity .25s ease-in-out;
+            z-index: 100;
+        }
+        
+        // tooltip's arrow
+        &::before {
+            content: '';
+            border: $arrow solid transparent;
+            border-right-color: var(--tooltip-bg);
+            transform: translate(calc(#{$offset} + 1px), -50%);
+            @include size(0);
+        }
+        
+        // tooltip's container
+        &::after {
+            content: attr(aria-label);
+            // content: attr(aria-labelledby);
+            width: max-content;
+            height: auto;
+            padding: .5em .75em;
+            background-color: var(--tooltip-bg);
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px darken($tooltip-bg, 15%);
+            border-radius: .33em;
+            transform: translate(calc(100% + #{$offset}), -50%);
+            @include grid-center();
+        }
+        
+        &:hover::before,
+        &:hover::after {
+            visibility: visible;
+            opacity: 1;
+            // tooltip appears only after a delay
+            transition-delay: 1s;
         }
     }
 }
 
+.svg-icon {
+    @include size(#{$btn-width - 4px});
 
+    &:active {
+        // important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
+        pointer-events: none;
+    }
+
+}
+
+// DIV with the button to export color list ------------------------------------
 .copyList {
     grid-column: 1/-1;
     height: auto;
@@ -291,10 +343,11 @@ button {
 }
 
 .swatch~.copyList {
-    // visible only if there is at least one .swatch
+    // the DIV is visible only if there is at least one .swatch
     display: block;
 }
 
+// Notifications after actions ---------------------------------------------
 .notif {
     $h: 3em;
     min-width: 15vw;

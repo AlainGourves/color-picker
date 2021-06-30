@@ -252,7 +252,7 @@ function loadSwatch(swatch){
 function getSwatch(ev) {
     // get the parent .swatch from the clicked button
     if (ev.target.classList.contains('btn')) {
-        let swatch = ev.target.parentNode.parentNode;
+        let swatch = ev.target.parentNode.parentNode.parentNode;
         if (ev.target.classList.contains('clear')) {
             swatch.classList.add('cleared');
             swatch.addEventListener('transitionend', e => {

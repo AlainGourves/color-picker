@@ -46,30 +46,34 @@
     <template id="tmpl_swatch">
         <article class="swatch info" draggable="true">
             <div class="btns">
-                <button class="btn cog" role="button" aria-label="Options">
-                    <svg role="img" class="svg-icon" aria-labelledby="desc">
-                        <desc id="desc">Options</desc>
-                        <use xlink:href="/img/icons-sprite.svg#icon-cog" />
-                    </svg>
-                </button>
-                <button class="btn load" role="button" aria-label="Load color">
-                    <svg role="img" class="svg-icon" aria-labelledby="desc">
-                        <desc id="desc">Load this color in the color picker</desc>
-                        <use xlink:href="/img/icons-sprite.svg#icon-tray-up" />
-                    </svg>
-                </button>
-                <button class="btn copy" role="button" aria-label="Copy to clipboard">
-                    <svg role="img" class="svg-icon" aria-labelledby="desc">
-                        <desc id="desc">Copy the RGB values of current color to the clipboard</desc>
-                        <use xlink:href="/img/icons-sprite.svg#icon-clipboard" />
-                    </svg>
-                </button>
-                <button class="btn clear" role="button" aria-label="Delete color">
-                    <svg role="img" class="svg-icon" aria-labelledby="desc">
-                        <desc id="desc">Delete this color swatch</desc>
-                        <use xlink:href="/img/icons-sprite.svg#icon-trashcan" />
-                    </svg>
-                </button>
+                <div class="btn__col">
+                    <button class="btn cog" role="button" aria-label="Options">
+                        <svg role="img" class="svg-icon" aria-labelledby="desc">
+                            <desc id="desc">Options</desc>
+                            <use xlink:href="/img/icons-sprite.svg#icon-cog" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="btn__col">
+                    <button class="btn load" role="button" aria-label="Load color">
+                        <svg role="img" class="svg-icon" aria-labelledby="desc">
+                            <desc id="desc">Load this color in the color picker</desc>
+                            <use xlink:href="/img/icons-sprite.svg#icon-tray-up" />
+                        </svg>
+                    </button>
+                    <button class="btn copy" role="button" aria-label="Copy to clipboard">
+                        <svg role="img" class="svg-icon" aria-labelledby="desc">
+                            <desc id="desc">Copy the RGB values of current color to the clipboard</desc>
+                            <use xlink:href="/img/icons-sprite.svg#icon-clipboard" />
+                        </svg>
+                    </button>
+                    <button class="btn clear" role="button" aria-label="Delete color">
+                        <svg role="img" class="svg-icon" aria-labelledby="desc">
+                            <desc id="desc">Delete this color swatch</desc>
+                            <use xlink:href="/img/icons-sprite.svg#icon-trashcan" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </article>
     </template>
