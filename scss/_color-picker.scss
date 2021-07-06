@@ -10,7 +10,6 @@ $r-sample: 0.5em; // rayon
 
     &>* {
         @include grid-center;
-        width: $width;
     }
 }
 
@@ -21,13 +20,33 @@ $r-sample: 0.5em; // rayon
 
 #wheel__container {
     grid-area: 1/1;
+    width: $width;
     position: relative;
-
+    
     button {
         position: absolute;
-        @include size(2.5em);
+        @include size(4em);
         bottom: 0;
         right: 0;
+    }
+}
+
+.hue__rotation {
+    position: absolute;
+    color: #fff;
+    transform-origin: $r-wheel $r-wheel;
+    transform: rotate(calc(135deg + var(--hue-rotation)));
+
+    &-content{
+        $offset: .125em; // offset relative to the wheel
+        $pos: ((1 - math.div(1, math.sqrt(2))) * $r-wheel) - $offset;
+        position: absolute;
+        top: $pos;
+        left: $pos;
+        font-size: .8em;
+        line-height: 1;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        transition: transform .125s ease-in-out;
     }
 }
 
@@ -116,11 +135,13 @@ button {
     appearance: none;
     border: 0;
     background-color: transparent;
-
+    
     & svg {
         fill: hotpink;
-        width: 100%;
-        height: 100%;
+        @include size(100%);
+        
+        // !important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
+        pointer-events: none;
 
         &:hover {
             fill: deepskyblue;
@@ -131,7 +152,7 @@ button {
 /* ------------------- Color swatches -- */
 #swatches {
     position: relative;
-    width: 80vw;
+    max-width: 80vw;
     @include grid-center;
     grid-template-columns: repeat(auto-fill, var(--swatch-size));
     gap: .8em;
@@ -150,10 +171,12 @@ button {
     transition: transform .5s cubic-bezier(0.5, -0.5, 0.75, 1.5);
     z-index: auto;
 
-    &:focus-within,
-    &:hover {
-        // make sure that the btns' tooltips are not hidden behind the other swatches
+    // make sure that the btns' tooltips are not hidden behind the other swatches
+    &:focus-within {
         z-index: 10;
+    }
+    &:hover {
+        z-index: 12;
     }
 
     // display color RGB values
@@ -212,7 +235,7 @@ button {
 
 // Swatch buttons columns
 // 2 columns, only one displayed at the time
-$btn-width: 24px;
+$btn-width: 32px;
 
 .btns {
     position: absolute;
@@ -310,18 +333,13 @@ $btn-width: 24px;
             // tooltip appears only after a delay
             transition-delay: 1s;
         }
+        
+        & .svg-icon {
+            @include size(#{$btn-width - 4px});
+        }
     }
 }
 
-.svg-icon {
-    @include size(#{$btn-width - 4px});
-
-    &:active {
-        // important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
-        pointer-events: none;
-    }
-
-}
 
 // DIV with the button to export color list ------------------------------------
 .copyList {

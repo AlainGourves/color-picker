@@ -10,17 +10,20 @@
 
 <body>
     <section id="color-picker">
-        <div id="wheel__container">
+        <div id="wheel__container" data-rotation="0">
             <div class="wheel">
                 <div class="sample"></div>
             </div>
             <canvas id="canvas"></canvas>
-            <button role="button" aria-label="Save this color">
+            <button role="button" type="button" aria-label="Save this color">
                 <svg role="img" class="svg-icon" aria-labelledby="desc">
                     <desc>Click to save this color to an individual swatch</desc>
                     <use xlink:href="/img/icons-sprite.svg#icon-tray-down" />
                 </svg>
             </button>
+            <div class="hue__rotation">
+                <div class="hue__rotation-content info">Bob</div>
+            </div>
         </div>
 
         <div id="color__container">
@@ -31,7 +34,7 @@
 
     <section id="swatches">
         <div class="copyList">
-            <button role="button" aria-label="Copy colors' list to clipboard">
+            <button role="button" type="button" aria-label="Copy colors' list to clipboard">
                 Copy to clipboard
                 <svg role="img" class="svg-icon" aria-labelledby="desc">
                     <desc>Copy colors' list to clipboard</desc>
@@ -47,7 +50,7 @@
         <article class="swatch info" draggable="true">
             <div class="btns">
                 <div class="btn__col">
-                    <button class="btn cog" role="button" aria-label="Options">
+                    <button class="btn cog" role="button" type="button" aria-label="Options">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Options</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-cog" />
@@ -55,19 +58,19 @@
                     </button>
                 </div>
                 <div class="btn__col">
-                    <button class="btn load" role="button" aria-label="Load color">
+                    <button class="btn load" role="button" type="button" aria-label="Load color">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Load this color in the color picker</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-tray-up" />
                         </svg>
                     </button>
-                    <button class="btn copy" role="button" aria-label="Copy to clipboard">
+                    <button class="btn copy" role="button" type="button" aria-label="Copy to clipboard">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Copy the RGB values of current color to the clipboard</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-clipboard" />
                         </svg>
                     </button>
-                    <button class="btn clear" role="button" aria-label="Delete color">
+                    <button class="btn clear" role="button" type="button" aria-label="Delete color">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Delete this color swatch</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-trashcan" />

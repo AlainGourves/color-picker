@@ -7,7 +7,7 @@
 }
 
 :root {
-    --fondPage:hsl(45, 21%, 93%);
+    --fondPage:hsl(220, 4.5%, 26.3%);
     --hue-rotation: 0deg;
     --color-picked: hsl(0,100%,50%);
     --swatch-size: 140px;
@@ -21,7 +21,7 @@ body {
   min-height: 100vh;
   @include grid-center;
   gap: 2em;
-  background: hsl(220, 4.5%, 26.3%);
+  background: var(--fondPage);
 }
 
 img {

@@ -1,10 +1,15 @@
 const root = document.documentElement;
 const wheel = document.querySelector('.wheel');
+const rotationValue = document.querySelector('.hue__rotation-content');
 const hueSample = document.querySelector('.sample');
 const colorPicked = document.querySelector('.picked-color');
 const btnNewSwatch = document.querySelector('#wheel__container > button');
 const canvas = document.querySelector('#canvas');
 let ctx;
+
+let isFlipped = false;
+let prevRotationMatrix = [];
+
 
 // stores the coordinates of the wheel's center (to cumpute the angle of rotation)
 let wheelCenter;
@@ -35,6 +40,32 @@ function hueMoveDrag(ev) {
     if (angle < 0) angle += 360;
     if (angle === -0) angle = 0;
     root.style.setProperty('--hue-rotation', `${angle}deg`); // error without the 'deg' part !!
+    if (angle >= 0 && angle < 180 && !isFlipped) {
+        // stores previous rotation matrix
+        let m = window.getComputedStyle(rotationValue).transform; // "matrix(a,b,c,d,e,f)"
+        m = m.replace(/matrix\((.*)\)/, '$1').split(',');
+        m.forEach((el, idx) => {
+            prevRotationMatrix[idx] = parseFloat(el);
+        });
+        // computes new rotation matrix
+        const flipMatrix = [-1, 0, 0, -1]; // rotation matrix for "rotateZ(180deg)"
+        let newMatrix = [];
+        newMatrix[0] = (prevRotationMatrix[0] * flipMatrix[0]) + (prevRotationMatrix[2] * flipMatrix[1]);
+        newMatrix[1] = (prevRotationMatrix[1] * flipMatrix[0]) + (prevRotationMatrix[3] * flipMatrix[1]);
+        newMatrix[2] = (prevRotationMatrix[0] * flipMatrix[2]) + (prevRotationMatrix[2] * flipMatrix[3]);
+        newMatrix[3] = (prevRotationMatrix[1] * flipMatrix[2]) + (prevRotationMatrix[3] * flipMatrix[3]);
+        newMatrix[4] = parseFloat(prevRotationMatrix[4]);
+        newMatrix[5] = parseFloat(prevRotationMatrix[5]);
+        rotationValue.style.setProperty('transform', `matrix(${newMatrix.join(',')})`);
+
+        isFlipped = true;
+    }
+    if (angle >= 180 && angle <360 && isFlipped) {
+        // restores previous rotation matrix
+        rotationValue.style.setProperty('transform', `matrix(${prevRotationMatrix.join(',')})`);
+        
+        isFlipped = false;
+    }
     updateCanvas();
 }
 
@@ -145,6 +176,8 @@ function drawCircle() {
 }
 
 function updateCanvas() {
+    // display hue rotation value
+    rotationValue.innerText = getComputedStyle(root).getPropertyValue('--hue-rotation')
     let clr = window.getComputedStyle(canvas).backgroundColor;
     // erase canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -329,7 +362,14 @@ function notifUp() {
 
 // ----------------------------------------------Page Load
 window.addEventListener("load", e => {
-    
+    // Force Safari to give focus on buttons when they are clicked
+    // (without this the ':focus-within' trick on swatches' btn doesn't work)
+    document.addEventListener('click', e => {
+        if (e.target.matches('button.btn.cog')) {
+            e.target.focus();
+        }
+    }, false);
+
     getWheelCenter();
 
     ctx = canvas.getContext('2d');
