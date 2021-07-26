@@ -22,7 +22,7 @@ $r-sample: 0.5em; // rayon
     grid-area: 1/1;
     width: $width;
     position: relative;
-    
+
     button {
         position: absolute;
         @include size(4em);
@@ -37,7 +37,7 @@ $r-sample: 0.5em; // rayon
     transform-origin: $r-wheel $r-wheel;
     transform: rotate(calc(135deg + var(--hue-rotation)));
 
-    &-content{
+    &-content {
         $offset: .125em; // offset relative to the wheel
         $pos: ((1 - math.div(1, math.sqrt(2))) * $r-wheel) - $offset;
         position: absolute;
@@ -135,11 +135,11 @@ button {
     appearance: none;
     border: 0;
     background-color: transparent;
-    
+
     & svg {
         fill: hotpink;
         @include size(100%);
-        
+
         // !important ! le svg ne doit pas capter les clics, ça simplifie bcq la gestion des boutons
         pointer-events: none;
 
@@ -175,10 +175,32 @@ button {
     &:focus-within {
         z-index: 10;
     }
+
     &:hover {
         z-index: 12;
     }
 
+    // show/hide tools btns
+    & .btns{
+        & .btn__col:nth-child(1) {
+            opacity: 1;
+            visibility: visible;
+        }
+        & .btn__col:nth-child(2) {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+    &.tools .btns{
+        & .btn__col:nth-child(1) {
+            opacity: 0;
+            visibility: hidden;
+        }
+        & .btn__col:nth-child(2) {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
     // display color RGB values
     // but not when the swatch is dragged
     &:not(.over)::after {
@@ -245,18 +267,6 @@ $btn-width: 32px;
     right: 0;
     display: grid;
 
-    &:focus-within {
-        & .btn__col:nth-child(1) {
-            opacity: 0;
-            visibility: hidden;
-        }
-        
-        & .btn__col:nth-child(2) {
-            opacity: 1;
-            visibility: visible;
-        }
-    }
-    
     & .btn__col {
         grid-area: 1/1;
         height: max-content;
@@ -270,16 +280,15 @@ $btn-width: 32px;
         transition: opacity .25s ease-in-out;
 
 
-        &:nth-child(1) {
+        opacity: 0;
+        visibility: hidden;
+
+        &.visible {
             opacity: 1;
             visibility: visible;
         }
-        
-        &:nth-child(2) {
-            opacity: 0;
-            visibility: hidden;
-        }
     }
+
     & .btn {
         @include size($btn-width);
 
@@ -289,7 +298,7 @@ $btn-width: 32px;
         $tooltip-bg: rgb(49, 49, 49);
         --tooltip-bg: #{$tooltip-bg};
         position: relative;
-        
+
         &::before,
         &::after {
             position: absolute;
@@ -300,7 +309,7 @@ $btn-width: 32px;
             transition: opacity .25s ease-in-out;
             z-index: 100;
         }
-        
+
         // tooltip's arrow
         &::before {
             content: '';
@@ -309,7 +318,7 @@ $btn-width: 32px;
             transform: translate(calc(#{$offset} + 1px), -50%);
             @include size(0);
         }
-        
+
         // tooltip's container
         &::after {
             content: attr(aria-label);
@@ -325,7 +334,7 @@ $btn-width: 32px;
             transform: translate(calc(100% + #{$offset}), -50%);
             @include grid-center();
         }
-        
+
         &:hover::before,
         &:hover::after {
             visibility: visible;
@@ -333,7 +342,7 @@ $btn-width: 32px;
             // tooltip appears only after a delay
             transition-delay: 1s;
         }
-        
+
         & .svg-icon {
             @include size(#{$btn-width - 4px});
         }

@@ -7,9 +7,10 @@ const btnNewSwatch = document.querySelector('#wheel__container > button');
 const canvas = document.querySelector('#canvas');
 let ctx;
 
+
+// handle the hue rotation value text flipping around the wheel
 let isFlipped = false;
 let prevRotationMatrix = [];
-
 
 // stores the coordinates of the wheel's center (to cumpute the angle of rotation)
 let wheelCenter;
@@ -39,8 +40,10 @@ function hueMoveDrag(ev) {
     let angle = Math.round((Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * 180) / Math.PI);
     if (angle < 0) angle += 360;
     if (angle === -0) angle = 0;
-    root.style.setProperty('--hue-rotation', `${angle}deg`); // error without the 'deg' part !!
+    root.style.setProperty('--hue-rotation', `${angle}deg`); // don't forget the 'deg'' unit !
     if (angle >= 0 && angle < 180 && !isFlipped) {
+        /* Between 0 & 180 degrees, the text is flipped, we need to compute a new transformation matrix as it's not possible to simply add a new class : the different transformations must be chained.
+        */
         // stores previous rotation matrix
         let m = window.getComputedStyle(rotationValue).transform; // "matrix(a,b,c,d,e,f)"
         m = m.replace(/matrix\((.*)\)/, '$1').split(',');
@@ -296,8 +299,21 @@ function getSwatch(ev) {
             toClipboard(clr);
         } else if (ev.target.classList.contains('load')) {
             loadSwatch(swatch);
+        } else if (ev.target.classList.contains('cog')) {
+            displayTools(swatch);
         }
     }
+}
+
+function displayTools(clickedSwatch){
+    const swatches = swatchesContainer.querySelectorAll('.swatch');
+    swatches.forEach(sw => {
+        if (sw === clickedSwatch) {
+            sw.classList.add('tools');
+        }else{
+            sw.classList.remove('tools');
+        }
+    })
 }
 
 async function toClipboard(src) {
@@ -308,7 +324,7 @@ async function toClipboard(src) {
         message = "Color copied to clipboard";
     }else{
         // list of colors
-        // src = src.join(', ');
+        // src = src.join(', '); // comma separated list
         src = src.join('\n');
         message = "List of colors copied to clipboard";
     }
@@ -362,13 +378,6 @@ function notifUp() {
 
 // ----------------------------------------------Page Load
 window.addEventListener("load", e => {
-    // Force Safari to give focus on buttons when they are clicked
-    // (without this the ':focus-within' trick on swatches' btn doesn't work)
-    document.addEventListener('click', e => {
-        if (e.target.matches('button.btn.cog')) {
-            e.target.focus();
-        }
-    }, false);
 
     getWheelCenter();
 
@@ -383,8 +392,6 @@ window.addEventListener("load", e => {
     };
     updateCanvas();
 
-    // hueSample.addEventListener('mousedown', hueStartDrag, false);
-    // canvas.addEventListener('mousedown', colorStartDrag, false);
     customAddEventListener(hueSample, 'down', hueStartDrag);
     customAddEventListener(canvas, 'down', colorStartDrag);
 
