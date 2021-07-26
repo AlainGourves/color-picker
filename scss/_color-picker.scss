@@ -35,18 +35,14 @@ $r-sample: 0.5em; // rayon
     position: absolute;
     color: #fff;
     transform-origin: $r-wheel $r-wheel;
-    transform: rotate(calc(135deg + var(--hue-rotation)));
-
+    transform: rotate(calc(135deg + var(--hue-rotation))); // 135deg to go from the top left corner of the container to the 0deg position
+    
     &-content {
-        $offset: .125em; // offset relative to the wheel
-        $pos: ((1 - math.div(1, math.sqrt(2))) * $r-wheel) - $offset;
         position: absolute;
-        top: $pos;
-        left: $pos;
+        top: 2em;
+        left: 2em;
         font-size: .8em;
-        line-height: 1;
-        transform: translate(-50%, -50%) rotate(-45deg);
-        transition: transform .125s ease-in-out;
+        transform: translate(-50%, -50%) rotate(calc((var(--hue-rotation) * -1) - 135deg));
     }
 }
 

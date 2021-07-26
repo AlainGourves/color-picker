@@ -41,34 +41,35 @@ function hueMoveDrag(ev) {
     if (angle < 0) angle += 360;
     if (angle === -0) angle = 0;
     root.style.setProperty('--hue-rotation', `${angle}deg`); // don't forget the 'deg'' unit !
-    if (angle >= 0 && angle < 180 && !isFlipped) {
-        /* Between 0 & 180 degrees, the text is flipped, we need to compute a new transformation matrix as it's not possible to simply add a new class : the different transformations must be chained.
-        */
-        // stores previous rotation matrix
-        let m = window.getComputedStyle(rotationValue).transform; // "matrix(a,b,c,d,e,f)"
-        m = m.replace(/matrix\((.*)\)/, '$1').split(',');
-        m.forEach((el, idx) => {
-            prevRotationMatrix[idx] = parseFloat(el);
-        });
-        // computes new rotation matrix
-        const flipMatrix = [-1, 0, 0, -1]; // rotation matrix for "rotateZ(180deg)"
-        let newMatrix = [];
-        newMatrix[0] = (prevRotationMatrix[0] * flipMatrix[0]) + (prevRotationMatrix[2] * flipMatrix[1]);
-        newMatrix[1] = (prevRotationMatrix[1] * flipMatrix[0]) + (prevRotationMatrix[3] * flipMatrix[1]);
-        newMatrix[2] = (prevRotationMatrix[0] * flipMatrix[2]) + (prevRotationMatrix[2] * flipMatrix[3]);
-        newMatrix[3] = (prevRotationMatrix[1] * flipMatrix[2]) + (prevRotationMatrix[3] * flipMatrix[3]);
-        newMatrix[4] = parseFloat(prevRotationMatrix[4]);
-        newMatrix[5] = parseFloat(prevRotationMatrix[5]);
-        rotationValue.style.setProperty('transform', `matrix(${newMatrix.join(',')})`);
+    
+    // if (angle >= 0 && angle < 180 && !isFlipped) {
+    //     /* Between 0 & 180 degrees, the text is flipped, we need to compute a new transformation matrix as it's not possible to simply add a new class : the different transformations must be chained.
+    //     */
+    //     // stores previous rotation matrix
+    //     let m = window.getComputedStyle(rotationValue).transform; // "matrix(a,b,c,d,e,f)"
+    //     m = m.replace(/matrix\((.*)\)/, '$1').split(',');
+    //     m.forEach((el, idx) => {
+    //         prevRotationMatrix[idx] = parseFloat(el);
+    //     });
+    //     // computes new rotation matrix
+    //     const flipMatrix = [-1, 0, 0, -1]; // rotation matrix for "rotateZ(180deg)"
+    //     let newMatrix = [];
+    //     newMatrix[0] = (prevRotationMatrix[0] * flipMatrix[0]) + (prevRotationMatrix[2] * flipMatrix[1]);
+    //     newMatrix[1] = (prevRotationMatrix[1] * flipMatrix[0]) + (prevRotationMatrix[3] * flipMatrix[1]);
+    //     newMatrix[2] = (prevRotationMatrix[0] * flipMatrix[2]) + (prevRotationMatrix[2] * flipMatrix[3]);
+    //     newMatrix[3] = (prevRotationMatrix[1] * flipMatrix[2]) + (prevRotationMatrix[3] * flipMatrix[3]);
+    //     newMatrix[4] = parseFloat(prevRotationMatrix[4]);
+    //     newMatrix[5] = parseFloat(prevRotationMatrix[5]);
+    //     rotationValue.style.setProperty('transform', `matrix(${newMatrix.join(',')})`);
 
-        isFlipped = true;
-    }
-    if (angle >= 180 && angle <360 && isFlipped) {
-        // restores previous rotation matrix
-        rotationValue.style.setProperty('transform', `matrix(${prevRotationMatrix.join(',')})`);
+    //     isFlipped = true;
+    // }
+    // if (angle >= 180 && angle <360 && isFlipped) {
+    //     // restores previous rotation matrix
+    //     rotationValue.style.setProperty('transform', `matrix(${prevRotationMatrix.join(',')})`);
         
-        isFlipped = false;
-    }
+    //     isFlipped = false;
+    // }
     updateCanvas();
 }
 
