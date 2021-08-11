@@ -1,5 +1,5 @@
 $width: 18em;
-$r-wheel: math.div($width, 2); // rayon roue
+$r-wheel: $width * 0.5; // rayon roue
 $w-wheel: 2em; // épaisseur roue
 $r-sample: 0.5em; // rayon 
 
@@ -107,7 +107,7 @@ $r-sample: 0.5em; // rayon
     position: relative;
     grid-area: 1/2;
     background-color: var(--color-picked);
-    border: 1px solid #fff8;
+    // border: 1px solid #fff8;
 
     &::after {
         content: attr(data-color-picked);
@@ -116,7 +116,7 @@ $r-sample: 0.5em; // rayon
         bottom: 0;
         left: 0;
         padding: .4em .8em;
-        border-top-right-radius: .25em;
+        border-top-right-radius: 2em;
         background-color: rgba(0, 0, 0, .75);
     }
 }
@@ -162,7 +162,7 @@ button {
     border-top-left-radius: $radius;
     border-bottom-right-radius: $radius;
     position: relative;
-    // overflow: hidden;
+    overflow: hidden;
     transform: scale(1);
     transition: transform .5s cubic-bezier(0.5, -0.5, 0.75, 1.5);
     z-index: auto;
