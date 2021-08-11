@@ -209,7 +209,7 @@ function updateCanvas() {
 // ----------------------------------------------Color swatches
 const swatchesContainer = document.querySelector('#swatches');
 const copyList = document.querySelector('.copyList');
-// reference to the dragged swatch
+// reference to the dragged swatch :
 let dragSrcEl;
 
 // Drag events handlers
@@ -287,9 +287,13 @@ function loadSwatch(swatch){
 }
 
 function getSwatch(ev) {
-    // get the parent .swatch from the clicked button
     if (ev.target.classList.contains('btn')) {
-        let swatch = ev.target.parentNode.parentNode.parentNode;
+        let tg = ev.target;
+        // get the parent .swatch from the clicked button
+        do {
+            tg = tg.parentNode;
+        } while(!tg.classList.contains('swatch'))
+        let swatch = tg;
         if (ev.target.classList.contains('clear')) {
             swatch.classList.add('cleared');
             swatch.addEventListener('transitionend', e => {
