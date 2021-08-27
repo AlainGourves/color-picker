@@ -102,8 +102,10 @@
 
     &.over {
         // Drop zone
-        border: 4px dashed #fff4;
-        background-image: repeating-linear-gradient(135deg, #fff1, #fff1 10%, transparent calc(10% + 1px), transparent 20%);
+        --clr: #fff9;
+        background-image: repeating-linear-gradient(135deg, #fff4, #fff4 10%, transparent calc(10% + 1px), transparent 20%);
+        background-blend-mode: difference;
+        box-shadow: 0 0 0 4px var(--clr) inset;
 
         &::before {
             position: absolute;
@@ -113,7 +115,8 @@
             font-family: sans-serif;
             font-weight: 600;
             font-size: 1.5em;
-            color: #fff4;
+            color: var(--clr);
+            text-shadow: 1px 1px 1px rgba(0,0,0,.5);
         }
 
         // swatch's buttons are masked when dragging
