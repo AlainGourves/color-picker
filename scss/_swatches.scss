@@ -1,0 +1,253 @@
+/* ------------------- Color swatches -- */
+:root{
+
+    --pad-width: 6px;
+}
+
+#swatches {
+    margin-bottom: 3em;
+}
+
+
+.swatches__container {
+    width: 80vw;
+    display: flex;
+    flex-wrap: wrap;
+    position: relative;
+    padding: 1em;
+    gap: 1em;
+    transition: gap var(--transition);
+
+    &.dragged {
+        gap: 1em calc((1em - var(--pad-width)) / 2);
+    }
+}
+
+.swatch {
+    $radius: 2em;
+    @include size(var(--swatch-size));
+    border-top-left-radius: $radius;
+    border-bottom-right-radius: $radius;
+    position: relative;
+    overflow: hidden;
+    transform: scale(1);
+    transition: transform .5s cubic-bezier(0.5, -0.5, 0.75, 1.5),
+                opacity .5s linear;
+    z-index: auto;
+
+    // make sure that the btns' tooltips are not hidden behind the other swatches
+    &:focus-within {
+        z-index: 10;
+    }
+
+    &:hover {
+        z-index: 12;
+    }
+
+    // show/hide tools btns
+    & .btns {
+        & .btn__col:nth-child(1) {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        & .btn__col:nth-child(2) {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
+    &.tools .btns {
+        & .btn__col:nth-child(1) {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        & .btn__col:nth-child(2) {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    // display color RGB values
+    // but not when the swatch is dragged
+    &:not(.over)::after {
+        position: absolute;
+        content: attr(data-bg-color);
+        width: 100%;
+        height: $radius;
+        bottom: 0;
+        left: 0;
+        @include grid-center;
+        border-top-left-radius: $radius;
+        font-size: .8em;
+        background-color: rgba(0, 0, 0, .5);
+        z-index: 1;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: transform .25s ease-in-out,
+                    opacity .25s linear;
+    }
+
+    &.cleared {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    &:hover:not(.over)::after {
+        // display rgb values on hover
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    &.over {
+        // Drop zone
+        border: 4px dashed #fff4;
+        background-image: repeating-linear-gradient(135deg, #fff1, #fff1 10%, transparent calc(10% + 1px), transparent 20%);
+
+        &::before {
+            position: absolute;
+            content: 'Drop Me!';
+            @include inset0;
+            @include grid-center;
+            font-family: sans-serif;
+            font-weight: 600;
+            font-size: 1.5em;
+            color: #fff4;
+        }
+
+        // swatch's buttons are masked when dragging
+        & .btns {
+            display: none;
+        }
+    }
+}
+
+
+.swatch__pad {
+    width: var(--pad-width);
+    background-color: #777;
+    border-radius: calc(var(--pad-width) / 2);
+    transition: transform var(--transition);
+
+    &.over {
+        // Drop zone
+        background-color: #aaa;
+        transform: scaleY(1.2);
+    }
+}
+
+// Swatch buttons columns
+// 2 columns, only one displayed at the time
+$btn-width: 32px;
+
+.btns {
+    position: absolute;
+    width: $btn-width;
+    // height: $btn-width * 3;
+    top: 0;
+    right: 0;
+    display: grid;
+
+    & .btn__col {
+        grid-area: 1/1;
+        height: max-content;
+        padding-bottom: .5em;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        border-bottom-left-radius: 1em;
+        background-color: rgba(0, 0, 0, .5);
+        transition: opacity .25s ease-in-out;
+
+
+        opacity: 0;
+        visibility: hidden;
+
+        &.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+    }
+
+    & .btn {
+        @include size($btn-width);
+
+        // Tooltips for the buttons
+        $arrow: 6px;
+        $offset: .5em;
+        $tooltip-bg: rgb(49, 49, 49);
+        --tooltip-bg: #{$tooltip-bg};
+        position: relative;
+
+        &::before,
+        &::after {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity .25s ease-in-out;
+            z-index: 100;
+        }
+
+        // tooltip's arrow
+        &::before {
+            content: '';
+            border: $arrow solid transparent;
+            border-right-color: var(--tooltip-bg);
+            transform: translate(calc(#{$offset} + 1px), -50%);
+            @include size(0);
+        }
+
+        // tooltip's container
+        &::after {
+            content: attr(aria-label);
+            // content: attr(aria-labelledby);
+            width: max-content;
+            height: auto;
+            padding: .5em .75em;
+            background-color: var(--tooltip-bg);
+            color: #fff;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px darken($tooltip-bg, 15%);
+            border-radius: .33em;
+            transform: translate(calc(100% + #{$offset}), -50%);
+            @include grid-center();
+        }
+
+        &:hover::before,
+        &:hover::after {
+            visibility: visible;
+            opacity: 1;
+            // tooltip appears only after a delay
+            transition-delay: 1s;
+        }
+
+        & .svg-icon {
+            @include size(#{$btn-width - 4px});
+        }
+    }
+}
+
+
+// DIV with the button to export color list ------------------------------------
+.copyList {
+    grid-column: 1/-1;// TODO
+    height: auto;
+    display: none;
+
+    & button {
+        display: flex;
+        align-items: center;
+        gap: .25em;
+        padding: .25em .5em;
+        margin: 0 auto;
+        background-color: rebeccapurple;
+    }
+
+    & .svg-icon {
+        @include size(2em);
+    }
+}

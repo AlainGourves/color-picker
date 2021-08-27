@@ -42,34 +42,6 @@ function hueMoveDrag(ev) {
     if (angle === -0) angle = 0;
     root.style.setProperty('--hue-rotation', `${angle}deg`); // don't forget the 'deg'' unit !
     
-    // if (angle >= 0 && angle < 180 && !isFlipped) {
-    //     /* Between 0 & 180 degrees, the text is flipped, we need to compute a new transformation matrix as it's not possible to simply add a new class : the different transformations must be chained.
-    //     */
-    //     // stores previous rotation matrix
-    //     let m = window.getComputedStyle(rotationValue).transform; // "matrix(a,b,c,d,e,f)"
-    //     m = m.replace(/matrix\((.*)\)/, '$1').split(',');
-    //     m.forEach((el, idx) => {
-    //         prevRotationMatrix[idx] = parseFloat(el);
-    //     });
-    //     // computes new rotation matrix
-    //     const flipMatrix = [-1, 0, 0, -1]; // rotation matrix for "rotateZ(180deg)"
-    //     let newMatrix = [];
-    //     newMatrix[0] = (prevRotationMatrix[0] * flipMatrix[0]) + (prevRotationMatrix[2] * flipMatrix[1]);
-    //     newMatrix[1] = (prevRotationMatrix[1] * flipMatrix[0]) + (prevRotationMatrix[3] * flipMatrix[1]);
-    //     newMatrix[2] = (prevRotationMatrix[0] * flipMatrix[2]) + (prevRotationMatrix[2] * flipMatrix[3]);
-    //     newMatrix[3] = (prevRotationMatrix[1] * flipMatrix[2]) + (prevRotationMatrix[3] * flipMatrix[3]);
-    //     newMatrix[4] = parseFloat(prevRotationMatrix[4]);
-    //     newMatrix[5] = parseFloat(prevRotationMatrix[5]);
-    //     rotationValue.style.setProperty('transform', `matrix(${newMatrix.join(',')})`);
-
-    //     isFlipped = true;
-    // }
-    // if (angle >= 180 && angle <360 && isFlipped) {
-    //     // restores previous rotation matrix
-    //     rotationValue.style.setProperty('transform', `matrix(${prevRotationMatrix.join(',')})`);
-        
-    //     isFlipped = false;
-    // }
     updateCanvas();
 }
 
@@ -207,63 +179,8 @@ function updateCanvas() {
 }
 
 // ----------------------------------------------Color swatches
-const swatchesContainer = document.querySelector('#swatches');
+const swContainer = document.querySelector('.swatches__container');
 const copyList = document.querySelector('.copyList');
-// reference to the dragged swatch :
-let dragSrcEl;
-
-// Drag events handlers
-function handleDragEnd(e) {
-    let swatches = swatchesContainer.querySelectorAll('.swatch');
-    swatches.forEach(s => {
-        s.classList.remove('over');
-        //remove event listeners
-        s.removeEventListener('dragenter', handleDragEnter);
-        s.removeEventListener('dragover', handleDragOver);
-        s.removeEventListener('dragleave', handleDragLeave);
-        s.removeEventListener('dragend', handleDragEnd);
-        s.removeEventListener('drop', handleDrop);
-    });
-    this.style.opacity = '1';
-}
-
-function handleDragEnter(e) {
-    this.classList.add('over');
-}
-
-function handleDragOver(e) {
-    // necessary to make the drop event possible !!
-    e.preventDefault();
-}
-
-function handleDragLeave(e) {
-    this.classList.remove('over');
-}
-
-function handleDrop(e) {
-    if (dragSrcEl !== this) {
-        dragSrcEl.outerHTML = this.outerHTML;
-        this.outerHTML = e.dataTransfer.getData('text/html');
-    }
-}
-
-function swatchesDragHandle(e) {
-    let swatches = swatchesContainer.querySelectorAll('.swatch');
-    swatches.forEach(s => {
-        if (s === e.target) {
-            dragSrcEl = s;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.dropEffect = 'move';
-            e.dataTransfer.setData('text/html', s.outerHTML);
-            s.style.opacity = '0.4';
-        }
-        s.addEventListener('dragenter', handleDragEnter, false);
-        s.addEventListener('dragover', handleDragOver, false);
-        s.addEventListener('dragleave', handleDragLeave, false);
-        s.addEventListener('dragend', handleDragEnd, false);
-        s.addEventListener('drop', handleDrop, false);
-    });
-}
 
 function addSwatch(ev) {
     const template = document.getElementById('tmpl_swatch');
@@ -273,7 +190,8 @@ function addSwatch(ev) {
     clone.dataset.canvasX = colorPicked.dataset.canvasX;
     clone.dataset.canvasY = colorPicked.dataset.canvasY;
     clone.style.backgroundColor = colorPicked.dataset.colorPicked;
-    swatchesContainer.insertBefore(clone, swatchesContainer.querySelector('.copyList'));
+    swContainer.appendChild(clone);
+    if (!copyList.style.display || copyList.style.display === 'none') copyList.style.display = 'block';
 }
 
 function loadSwatch(swatch){
@@ -289,20 +207,25 @@ function loadSwatch(swatch){
 function getSwatch(ev) {
     if (ev.target.classList.contains('btn')) {
         let tg = ev.target;
-        // get the parent .swatch from the clicked button
+        // get the parent .swatch of the clicked button
         do {
             tg = tg.parentNode;
         } while(!tg.classList.contains('swatch'))
         let swatch = tg;
         if (ev.target.classList.contains('clear')) {
+            // Btn to delete swatch
             swatch.classList.add('cleared');
             swatch.addEventListener('transitionend', e => {
                 swatch.remove();
+                let swatches = swContainer.querySelectorAll('.swatch');
+                if (swatches.length === 0) copyList.style.display = 'none';
             }, false);
         } else if (ev.target.classList.contains('copy')) {
+            // Btn to copy rbg value to clipboard
             let clr = swatch.dataset.bgColor;
             toClipboard(clr);
         } else if (ev.target.classList.contains('load')) {
+            // Btn to load the swatch' color in the color picker
             loadSwatch(swatch);
         } else if (ev.target.classList.contains('cog')) {
             displayTools(swatch);
@@ -311,7 +234,7 @@ function getSwatch(ev) {
 }
 
 function displayTools(clickedSwatch){
-    const swatches = swatchesContainer.querySelectorAll('.swatch');
+    const swatches = swContainer.querySelectorAll('.swatch');
     swatches.forEach(sw => {
         if (sw === clickedSwatch) {
             sw.classList.add('tools');
@@ -361,7 +284,7 @@ async function toClipboard(src) {
 }
 
 function exportColorList(e) {
-    const sw = swatchesContainer.querySelectorAll('.swatch');
+    const sw = swContainer.querySelectorAll('.swatch');
     let list = [];
     sw.forEach(e => {
         list.push(e.dataset.bgColor);
@@ -379,6 +302,136 @@ function notif(message){
 function notifUp() {
     this.classList.remove('visible');
     this.removeEventListener('transitionend', notifUp);
+}
+
+// -------------------------------------- Drag & Drop Swatches
+// reference to the dragged swatch & its index
+let dragSrcEl, dragSwatchIdx;
+
+// Utility functions
+function createPads(arr) {
+    // arr => array of swatches
+    // place a landing pad before every swatch
+    arr.forEach(sw => {
+        const pad = document.createElement('div');
+        pad.className = 'swatch__pad';
+        swContainer.insertBefore(pad, sw);
+    });
+    // and one last at the end
+    const pad = document.createElement('div');
+    pad.className = 'swatch__pad last';
+    swContainer.append(pad);
+}
+
+function deletePads() {
+    let pads = swContainer.querySelectorAll('.swatch__pad');
+    pads.forEach(p => {
+        p.remove();
+    });
+}
+
+function afterDragCleaning() {
+    deletePads();
+    if (dragSrcEl !== undefined) {
+        dragSrcEl.style.opacity = '1';
+        dragSrcEl = undefined;
+    }
+    swContainer.classList.remove('dragged');
+    // remove 'over' classes
+    swContainer.querySelectorAll('.swatch').forEach(c => c.classList.remove('over'));
+}
+
+// Drag & Drop functions -----------------------------
+function swatcheDragStart(e) {
+    swContainer.classList.add('dragged');
+    let swatches = swContainer.querySelectorAll('.swatch');
+    if (!swContainer.querySelectorAll('.swatch__pad').length) {
+        createPads(swatches);
+    }
+    swContainer.addEventListener('dragenter', swatchDragEnter, false);
+    swContainer.addEventListener('dragover', swatchDragOver, false);
+    swContainer.addEventListener('dragleave', swatchDragLeave, false);
+    swContainer.addEventListener('dragend', swatchDragEnd, false);
+    swContainer.addEventListener('drop', swatchDrop, false);
+
+    dragSrcEl = e.target;
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
+
+    // Get the index of the dragged swatch
+    swatches.forEach((s, idx) => {
+        if (s === dragSrcEl) {
+            dragSwatchIdx = idx;
+        }
+    })
+
+    dragSrcEl.style.opacity = '.4';
+}
+
+function swatchDragEnter(e) {
+    if (e.target.classList.contains('swatch') || e.target.classList.contains('swatch__pad')) {
+        e.target.classList.add('over');
+    }
+}
+
+function swatchDragOver(e) {
+    // necessary to make the drop event possible !!
+    e.preventDefault();
+}
+
+function swatchDragLeave(e) {
+    if (e.target.classList.contains('swatch') || e.target.classList.contains('swatch__pad')) {
+        e.target.classList.remove('over');
+    }
+}
+
+function swatchDragEnd(e) {
+    // remove events listeners
+    swContainer.removeEventListener('dragenter', swatchDragEnter);
+    swContainer.removeEventListener('dragover', swatchDragOver);
+    swContainer.removeEventListener('dragleave', swatchDragLeave);
+    swContainer.removeEventListener('dragend', swatchDragEnd);
+    swContainer.removeEventListener('drop', swatchDrop);
+
+    afterDragCleaning();
+}
+
+function swatchDrop(e) {
+    e.preventDefault();
+    if (e.target !== dragSrcEl) {
+        let swatches = swContainer.getElementsByClassName('swatch');
+        // Uses `getElementsByClassName()` to create a live nodelist (vs. 'static')
+        // cf. https://developer.mozilla.org/en-US/docs/Web/API/NodeList
+        let swLenght = swatches.length;
+        if (e.target.classList.contains('swatch')) {
+            // Swatwhes position are swapped
+            swatches[dragSwatchIdx].outerHTML = e.target.outerHTML;
+            e.target.outerHTML = e.dataTransfer.getData('text/html');
+        } else if (e.target.classList.contains('swatch__pad')) {
+            // Swatch was dropped on a pad
+            let padIdx;
+            // get dropped pad idx
+            let pads = swContainer.querySelectorAll('.swatch__pad');
+            pads.forEach((p, idx) => {
+                if (p === e.target) padIdx = idx
+            });
+
+            if (padIdx == swLenght) {
+                // swatch moved to the end
+                swContainer.appendChild(swatches[dragSwatchIdx]);
+            } else {
+                let old = swContainer.replaceChild(swatches[dragSwatchIdx], swatches[padIdx]);
+                if (padIdx >= dragSwatchIdx) {
+                    swContainer.insertBefore(old, swatches[padIdx]);
+                } else {
+                    swContainer.insertBefore(old, swatches[padIdx + 1]);
+                }
+            }
+        }
+    }
+    afterDragCleaning();
 }
 
 // ----------------------------------------------Page Load
@@ -402,7 +455,7 @@ window.addEventListener("load", e => {
 
     // ----------------------------------------------Color swatches
     btnNewSwatch.addEventListener('click', addSwatch, false);
-    swatchesContainer.addEventListener('dragstart', swatchesDragHandle, false);
-    swatchesContainer.addEventListener('click', getSwatch, false);
+    swContainer.addEventListener('dragstart', swatcheDragStart, false);
+    swContainer.addEventListener('click', getSwatch, false);
     copyList.addEventListener('click', exportColorList, false);
 }, false);
