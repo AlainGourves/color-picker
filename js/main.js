@@ -1,3 +1,8 @@
+import Swatch from './swatch.js';
+// debugger;
+let theSwatches = [];
+
+
 const root = document.documentElement;
 const wheel = document.querySelector('.wheel');
 const rotationValue = document.querySelector('.hue__rotation-content');
@@ -183,55 +188,58 @@ const swContainer = document.querySelector('.swatches__container');
 const copyList = document.querySelector('.copyList');
 
 function addSwatch(ev) {
-    const template = document.getElementById('tmpl_swatch');
-    const clone = template.content.firstElementChild.cloneNode(true);
-    clone.dataset.bgColor = colorPicked.dataset.colorPicked;
-    clone.dataset.angle = colorPicked.dataset.angle;
-    clone.dataset.canvasX = colorPicked.dataset.canvasX;
-    clone.dataset.canvasY = colorPicked.dataset.canvasY;
-    clone.style.backgroundColor = colorPicked.dataset.colorPicked;
-    swContainer.appendChild(clone);
-    if (!copyList.style.display || copyList.style.display === 'none') copyList.style.display = 'block';
+    const a = new Swatch(colorPicked);
+    a.create();
+    theSwatches.push(a);
+    // const template = document.getElementById('tmpl_swatch');
+    // const clone = template.content.firstElementChild.cloneNode(true);
+    // clone.dataset.bgColor = colorPicked.dataset.colorPicked;
+    // clone.dataset.angle = colorPicked.dataset.angle;
+    // clone.dataset.canvasX = colorPicked.dataset.canvasX;
+    // clone.dataset.canvasY = colorPicked.dataset.canvasY;
+    // clone.style.backgroundColor = colorPicked.dataset.colorPicked;
+    // swContainer.appendChild(clone);
+    // if (!copyList.style.display || copyList.style.display === 'none') copyList.style.display = 'block';
 }
 
-function loadSwatch(swatch){
-    let angle = swatch.dataset.angle;
-    root.style.setProperty('--hue-rotation', angle);
-    posSample.x = swatch.dataset.canvasX;
-    posSample.y = swatch.dataset.canvasY;
-    hueSample.classList.add('load-swatch');
-    updateCanvas();
-    hueSample.classList.remove('load-swatch');
-}
+// function loadSwatch(swatch){
+//     let angle = swatch.dataset.angle;
+//     root.style.setProperty('--hue-rotation', angle);
+//     posSample.x = swatch.dataset.canvasX;
+//     posSample.y = swatch.dataset.canvasY;
+//     hueSample.classList.add('load-swatch');
+//     updateCanvas();
+//     hueSample.classList.remove('load-swatch');
+// }
 
-function getSwatch(ev) {
-    if (ev.target.classList.contains('btn')) {
-        let tg = ev.target;
-        // get the parent .swatch of the clicked button
-        do {
-            tg = tg.parentNode;
-        } while(!tg.classList.contains('swatch'))
-        let swatch = tg;
-        if (ev.target.classList.contains('clear')) {
-            // Btn to delete swatch
-            swatch.classList.add('cleared');
-            swatch.addEventListener('transitionend', e => {
-                swatch.remove();
-                let swatches = swContainer.querySelectorAll('.swatch');
-                if (swatches.length === 0) copyList.style.display = 'none';
-            }, false);
-        } else if (ev.target.classList.contains('copy')) {
-            // Btn to copy rbg value to clipboard
-            let clr = swatch.dataset.bgColor;
-            toClipboard(clr);
-        } else if (ev.target.classList.contains('load')) {
-            // Btn to load the swatch' color in the color picker
-            loadSwatch(swatch);
-        } else if (ev.target.classList.contains('cog')) {
-            displayTools(swatch);
-        }
-    }
-}
+// function getSwatch(ev) {
+//     if (ev.target.classList.contains('btn')) {
+//         let tg = ev.target;
+//         // get the parent .swatch of the clicked button
+//         do {
+//             tg = tg.parentNode;
+//         } while(!tg.classList.contains('swatch'))
+//         let swatch = tg;
+//         if (ev.target.classList.contains('clear')) {
+//             // Btn to delete swatch
+//             swatch.classList.add('cleared');
+//             swatch.addEventListener('transitionend', e => {
+//                 swatch.remove();
+//                 let swatches = swContainer.querySelectorAll('.swatch');
+//                 if (swatches.length === 0) copyList.style.display = 'none';
+//             }, false);
+//         } else if (ev.target.classList.contains('copy')) {
+//             // Btn to copy rbg value to clipboard
+//             let clr = swatch.dataset.bgColor;
+//             toClipboard(clr);
+//         } else if (ev.target.classList.contains('load')) {
+//             // Btn to load the swatch' color in the color picker
+//             loadSwatch(swatch);
+//         } else if (ev.target.classList.contains('cog')) {
+//             displayTools(swatch);
+//         }
+//     }
+// }
 
 function displayTools(clickedSwatch){
     const swatches = swContainer.querySelectorAll('.swatch');
@@ -342,7 +350,7 @@ function afterDragCleaning() {
 }
 
 // Drag & Drop functions -----------------------------
-function swatcheDragStart(e) {
+function swatchDragStart(e) {
     swContainer.classList.add('dragged');
     let swatches = swContainer.querySelectorAll('.swatch');
     if (!swContainer.querySelectorAll('.swatch__pad').length) {
@@ -455,7 +463,10 @@ window.addEventListener("load", e => {
 
     // ----------------------------------------------Color swatches
     btnNewSwatch.addEventListener('click', addSwatch, false);
-    swContainer.addEventListener('dragstart', swatcheDragStart, false);
-    swContainer.addEventListener('click', getSwatch, false);
+    // swContainer.addEventListener('click', getSwatch, false);
     copyList.addEventListener('click', exportColorList, false);
+    Swatch.container.addEventListener('click', Swatch.getSwatch, false);
+    swContainer.addEventListener('dragstart', swatchDragStart, false);
+    console.log("Fin de load !")
+    console.log(Swatch.getSwatch)
 }, false);
