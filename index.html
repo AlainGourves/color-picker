@@ -51,7 +51,7 @@
         <article class="swatch info" draggable="true">
             <div class="btns">
                 <div class="btn__col visible">
-                    <button class="btn cog" role="button" type="button" aria-label="Options">
+                    <button class="btn cog" role="button" type="button" data-function="options" aria-label="Options">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Options</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-cog" />
@@ -59,19 +59,19 @@
                     </button>
                 </div>
                 <div class="btn__col">
-                    <button class="btn load" role="button" type="button" aria-label="Load color">
+                    <button class="btn load" role="button" type="button" data-function="load" aria-label="Load color">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Load this color in the color picker</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-tray-up" />
                         </svg>
                     </button>
-                    <button class="btn copy" role="button" type="button" aria-label="Copy to clipboard">
+                    <button class="btn copy" role="button" type="button" data-function="copy" aria-label="Copy to clipboard">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Copy the RGB values of current color to the clipboard</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-clipboard" />
                         </svg>
                     </button>
-                    <button class="btn clear" role="button" type="button" aria-label="Delete color">
+                    <button class="btn clear" role="button" type="button" data-function="delete" aria-label="Delete color">
                         <svg role="img" class="svg-icon" aria-labelledby="desc">
                             <desc id="desc">Delete this color swatch</desc>
                             <use xlink:href="/img/icons-sprite.svg#icon-trashcan" />

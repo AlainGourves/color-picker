@@ -1,26 +1,4 @@
 import Swatch from './swatch.js';
-// debugger;
-let theSwatches = [];
-
-
-const root = document.documentElement;
-const wheel = document.querySelector('.wheel');
-const rotationValue = document.querySelector('.hue__rotation-content');
-const hueSample = document.querySelector('.sample');
-const colorPicked = document.querySelector('.picked-color');
-const btnNewSwatch = document.querySelector('#wheel__container > button');
-const canvas = document.querySelector('#canvas');
-let ctx;
-
-
-// handle the hue rotation value text flipping around the wheel
-let isFlipped = false;
-let prevRotationMatrix = [];
-
-// stores the coordinates of the wheel's center (to cumpute the angle of rotation)
-let wheelCenter;
-// stores the coordinates of the selected color in the canvas
-let posSample;
 
 // Handle Hue selection :
 // - hueStartDrag() -> mousedown event (create event listeners for mousemove & mouseend)
@@ -46,8 +24,8 @@ function hueMoveDrag(ev) {
     if (angle < 0) angle += 360;
     if (angle === -0) angle = 0;
     root.style.setProperty('--hue-rotation', `${angle}deg`); // don't forget the 'deg'' unit !
-    
-    updateCanvas();
+
+    window.updateCanvas();
 }
 
 // Handle Color selection on the canvas element :
@@ -78,13 +56,13 @@ function colorMoveDrag(ev) {
     if (posSample.x > rect.width) posSample.x = rect.width - 1;
     if (posSample.y < 0) posSample.y = 0;
     if (posSample.y > rect.height) posSample.y = rect.height - 1;
-    updateCanvas();
+    window.updateCanvas();
 }
 
-function getWheelCenter(){
+function getWheelCenter() {
     // Compute the coordinates of the wheel's center
-    const rect = wheel.getBoundingClientRect();
-    wheelCenter = {
+    const rect = window.wheel.getBoundingClientRect();
+    window.wheelCenter = {
         x: rect.x + rect.width / 2,
         y: rect.y + rect.height / 2
     };
@@ -156,7 +134,7 @@ function drawCircle() {
     ctx.stroke();
 }
 
-function updateCanvas() {
+window.updateCanvas = function() {
     // display hue rotation value
     rotationValue.innerText = getComputedStyle(root).getPropertyValue('--hue-rotation')
     let clr = window.getComputedStyle(canvas).backgroundColor;
@@ -189,7 +167,6 @@ const copyList = document.querySelector('.copyList');
 
 function addSwatch(ev) {
     const a = new Swatch(colorPicked);
-    a.create();
     theSwatches.push(a);
     // const template = document.getElementById('tmpl_swatch');
     // const clone = template.content.firstElementChild.cloneNode(true);
@@ -208,7 +185,7 @@ function addSwatch(ev) {
 //     posSample.x = swatch.dataset.canvasX;
 //     posSample.y = swatch.dataset.canvasY;
 //     hueSample.classList.add('load-swatch');
-//     updateCanvas();
+//     window.updateCanvas();
 //     hueSample.classList.remove('load-swatch');
 // }
 
@@ -240,7 +217,7 @@ function addSwatch(ev) {
 //         }
 //     }
 // }
-
+/*
 function displayTools(clickedSwatch){
     const swatches = swContainer.querySelectorAll('.swatch');
     swatches.forEach(sw => {
@@ -441,32 +418,46 @@ function swatchDrop(e) {
     }
     afterDragCleaning();
 }
-
+*/
 // ----------------------------------------------Page Load
 window.addEventListener("load", e => {
+    window.root = document.documentElement;
+    window.wheel = document.querySelector('.wheel');
+    window.rotationValue = document.querySelector('.hue__rotation-content');
+    window.hueSample = document.querySelector('.sample');
+    window.colorPicked = document.querySelector('.picked-color');
+    window.btnNewSwatch = document.querySelector('#wheel__container > button');
+    window.canvas = document.querySelector('#canvas');
 
+    // handle the hue rotation value text flipping around the wheel
+    window.isFlipped = false;
+
+    // stores the coordinates of the wheel's center (to cumpute the angle of rotation)
+    window.wheelCenter;
+    // stores the coordinates of the selected color in the canvas
+    window.posSample;
+
+    window.theSwatches = [];
     getWheelCenter();
 
-    ctx = canvas.getContext('2d');
-    canvas.width = parseInt(window.getComputedStyle(canvas).width);
-    canvas.height = parseInt(window.getComputedStyle(canvas).height);
+    window.ctx = window.canvas.getContext('2d');
+    window.canvas.width = parseInt(window.getComputedStyle(window.canvas).width);
+    window.canvas.height = parseInt(window.getComputedStyle(window.canvas).height);
 
     // Initiate the selected color (by default center of the canvas)
-    posSample = {
-        x: canvas.width / 2,
-        y: canvas.height / 2
+    window.posSample = {
+        x: window.canvas.width / 2,
+        y: window.canvas.height / 2
     };
-    updateCanvas();
+    window.updateCanvas();
 
-    customAddEventListener(hueSample, 'down', hueStartDrag);
-    customAddEventListener(canvas, 'down', colorStartDrag);
+    customAddEventListener(window.hueSample, 'down', hueStartDrag);
+    customAddEventListener(window.canvas, 'down', colorStartDrag);
 
     // ----------------------------------------------Color swatches
-    btnNewSwatch.addEventListener('click', addSwatch, false);
+    window.btnNewSwatch.addEventListener('click', addSwatch, false);
     // swContainer.addEventListener('click', getSwatch, false);
-    copyList.addEventListener('click', exportColorList, false);
-    Swatch.container.addEventListener('click', Swatch.getSwatch, false);
-    swContainer.addEventListener('dragstart', swatchDragStart, false);
+    //copyList.addEventListener('click', exportColorList, false);
+    //swContainer.addEventListener('dragstart', swatchDragStart, false);
     console.log("Fin de load !")
-    console.log(Swatch.getSwatch)
 }, false);
