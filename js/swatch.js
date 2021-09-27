@@ -10,6 +10,8 @@ class Swatch {
         this.x = color.dataset.canvasX;
         this.y = color.dataset.canvasY;
         this.el;
+        // Compute a unique ID for the swatch
+        this.id = Math.floor(Math.random() * Math.floor(Math.random() * Date.now()));
         this.create();
     }
 
@@ -24,15 +26,15 @@ class Swatch {
         let btns = clone.querySelector('.btns');
         btns.addEventListener('click', this.getClick.bind(this), false);
         this.el = Swatch.container.appendChild(clone);
-        if (!Swatch.#copyList.style.display || Swatch.#copyList.style.display === 'none') Swatch.#copyList.style.display = 'block';
+        if (!Swatch.#copyList.style.display || Swatch.#copyList.style.display === 'none') {
+            Swatch.#copyList.style.display = 'block';
+        }
         Swatch.theSwatches.push(this);
     }
 
     getClick(ev) {
-        let self = this;
         if (ev.target.nodeName == 'BUTTON') {
             let fn = ev.target.dataset.function;
-            console.log(fn)
             switch (fn) {
                 case 'options':
                     this.el.classList.add('tools');
@@ -41,6 +43,8 @@ class Swatch {
                     this.loadSwatch();
                     break;
                 case 'copy':
+                    let clr = this.color;
+                    Swatch.toClipboard(clr);
                     break;
                 case 'delete':
                     this.deleteSwatch();
@@ -59,54 +63,69 @@ class Swatch {
         this.el.addEventListener('transitionend', e => {
             // NB: transitionend is fired twice, once for each property (opacity & transform)
             this.el.remove();
-            // TODO supprimer l'instance du array de swatches
-            // let swatches = swContainer.querySelectorAll('.swatch');
-            // if (swatches.length === 0) copyList.style.display = 'none';
         }, false);
+        // Remove the swatch from the array theSwatches
+        let delenda = this.id;
+        Swatch.theSwatches = Swatch.theSwatches.filter(sw => {
+            return sw.id !== delenda;
+        });
+        if (Swatch.theSwatches.length === 0) {
+            Swatch.#copyList.style.display = 'none';
+        }
     }
 
     loadSwatch() {
         document.documentElement.style.setProperty('--hue-rotation', this.angle);
-        window.posSample.x = this.x;
-        window.posSample.y = this.y;
-        window.hueSample.classList.add('load-swatch');
-        window.updateCanvas();
-        window.hueSample.classList.remove('load-swatch');
+        posSample.x = this.x;
+        posSample.y = this.y;
+        hueSample.classList.add('load-swatch');
+        updateCanvas();
+        hueSample.classList.remove('load-swatch');
     }
 
-    // getSwatch(ev) {
-    //     if (ev.target.classList.contains('btn')) {
-    //         let tg = ev.target;
-    //         // get the parent .swatch of the clicked button
-    //         do {
-    //             tg = tg.parentNode;
-    //         } while(!tg.classList.contains('swatch'))
-    //         let swatch = tg;
-    //         if (ev.target.classList.contains('clear')) {
-    //             // Btn to delete swatch
-    //             swatch.classList.add('cleared');
-    //             swatch.addEventListener('transitionend', e => {
-    //                 swatch.remove();
-    //                 let swatches = swContainer.querySelectorAll('.swatch');
-    //                 if (swatches.length === 0) copyList.style.display = 'none';
-    //             }, false);
-    //         } else if (ev.target.classList.contains('copy')) {
-    //             // Btn to copy rbg value to clipboard
-    //             let clr = swatch.dataset.bgColor;
-    //             toClipboard(clr);
-    //         } else if (ev.target.classList.contains('load')) {
-    //             // Btn to load the swatch' color in the color picker
-    //             loadSwatch(swatch);
-    //         } else if (ev.target.classList.contains('cog')) {
-    //             displayTools(swatch);
-    //         }
-    //     }
-    // }
-
-    cons() {
-        console.log("Dragstart ?")
+    static async toClipboard(src) {
+        let message;
+        let type = typeof(src);
+        if (type === 'string'){
+            // single color
+            message = "Color copied to clipboard";
+        }else{
+            // list of colors
+            // src = src.join(', '); // comma separated list
+            src = src.join('\n');
+            message = "List of colors copied to clipboard";
+        }
+        if (navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(src);
+                notif(message);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+            }
+        } else {
+            // alternative method with `document.execCommand('copy')`
+            const pasteboard = document.createElement('input');
+            pasteboard.setAttribute('readonly', 'readonly');
+            pasteboard.className = 'hidden';
+            pasteboard.value = src;
+            document.body.appendChild(pasteboard);
+            // save & restore user's selection
+            const selected = (document.getSelection().rangeCount > 0) ? document.getSelection().getRangeAt(0) : false;
+            pasteboard.select();
+            const result = document.execCommand('copy');
+            document.body.removeChild(pasteboard);
+            if (selected) {
+                document.getSelection().removeAllRanges();
+                document.getSelection().addRange(selected);
+            }
+            notif(message);
+        }
     }
 
+    static exportColorList() {
+        let list = Swatch.theSwatches.map(sw => {
+            return sw.color;
+        });
+        Swatch.toClipboard(list);
+    }
 }
-
-export default Swatch;
