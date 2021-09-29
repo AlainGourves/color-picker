@@ -26,23 +26,50 @@ $r-sample: 0.5em; // rayon
     button {
         position: absolute;
         @include size(4em);
-        bottom: 0;
-        right: 0;
+        bottom: -1em;
+        right: -2em;
     }
 }
 
 .hue__rotation {
+    $offset: .4em;
     position: absolute;
+    top: $offset;
+    left: $offset;
     color: #fff;
-    transform-origin: $r-wheel $r-wheel;
+    transform-origin: #{$r-wheel - $offset} #{$r-wheel - $offset};
     transform: rotate(calc(135deg + var(--hue-rotation))); // 135deg to go from the top left corner of the container to the 0deg position
     
+    $w: 2.1em;
+    $font-size: .8em;
     &-content {
+        --w: #{$w};
         position: absolute;
-        top: 2em;
-        left: 2em;
-        font-size: .8em;
-        transform: translate(-50%, -50%) rotate(calc((var(--hue-rotation) * -1) - 135deg));
+        display: grid;
+        align-content: center;
+        @include size((math.div($w, $font-size)) * 1em);
+        font-size: $font-size;
+        text-align: center;
+        transform:  rotate(calc((var(--hue-rotation) * -1) - 135deg));
+    }
+    
+    &::before,
+    &::after{
+        content: '';
+        position: absolute;
+        background-color: rgb(29, 29, 29);
+    }
+
+    &::before{
+    @include size($w);
+        border-radius: 50%;
+    }
+
+    &::after{
+        @include size(1em);
+        bottom: #{$w * -1};
+        right: #{$w * -1};
+        z-index: -1;
     }
 }
 
@@ -76,16 +103,18 @@ $r-sample: 0.5em; // rayon
     border: 2px solid #fff;
     border-radius: 50%;
     z-index: 10;
-    box-shadow: 0px 0px 4px rgba(0, 0, 0, .75);
+    box-shadow: 0 0 4px rgba(0, 0, 0, .75);
     touch-action: none;
 
     &:hover {
         cursor: pointer;
     }
 
-    &.load-swatch {
-        transition: transform .5s ease-in-out;
-    }
+}
+#wheel__container.load-swatch .sample,
+#wheel__container.load-swatch .hue__rotation,
+#wheel__container.load-swatch .hue__rotation-content {
+    transition: transform var(--transition);
 }
 
 

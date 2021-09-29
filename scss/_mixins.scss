@@ -61,8 +61,8 @@
     $angle: math.div(360deg, $n);
 
     @for $i from 0 through $n {
-        $v: $i * $angle;
-        $out: append($out, #{hsl($v, 100%, 50%) $v}, $separator: comma);
+        $h: $i * $angle;
+        $out: append($out, #{hsl($h, 100%, 50%) $h}, $separator: comma);
     }
 
     @return $out;

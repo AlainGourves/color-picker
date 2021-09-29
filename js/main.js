@@ -19,11 +19,11 @@ function hueEndDrag() {
 function hueMoveDrag(ev) {
     ev.preventDefault();
     let pos = getPosition(ev);
-    let angle = Math.round((Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * 180) / Math.PI);
+    let angle = Math.round(Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * (180 / Math.PI));
+    root.style.setProperty('--hue-rotation-raw', `${angle}deg`); // don't forget the 'deg'' unit !
     if (angle < 0) angle += 360;
     if (angle === -0) angle = 0;
     root.style.setProperty('--hue-rotation', `${angle}deg`); // don't forget the 'deg'' unit !
-
     updateCanvas();
 }
 
@@ -115,6 +115,7 @@ function getPixelColor() {
     let clr = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
     root.style.setProperty('--color-picked', clr);
     colorPicked.dataset.colorPicked = clr;
+    colorPicked.dataset.rawAngle = root.style.getPropertyValue('--hue-rotation-raw');
     colorPicked.dataset.angle = root.style.getPropertyValue('--hue-rotation');
     colorPicked.dataset.canvasX = posSample.x;
     colorPicked.dataset.canvasY = posSample.y;
@@ -133,9 +134,10 @@ function drawCircle() {
     ctx.stroke();
 }
 
-updateCanvas = function() {
+function updateCanvas() {
     // display hue rotation value
-    rotationValue.innerText = getComputedStyle(root).getPropertyValue('--hue-rotation')
+    let angle = getComputedStyle(root).getPropertyValue('--hue-rotation');
+    rotationValue.innerText = angle.replace('deg','°');
     let clr = window.getComputedStyle(canvas).backgroundColor;
     // erase canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -164,110 +166,6 @@ updateCanvas = function() {
 const swContainer = document.querySelector('.swatches__container');
 const copyList = document.querySelector('.copyList');
 
-function addSwatch(ev) {
-    const a = new Swatch(colorPicked);
-    // theSwatches.push(a);
-}
-
-// function loadSwatch(swatch){
-//     let angle = swatch.dataset.angle;
-//     root.style.setProperty('--hue-rotation', angle);
-//     posSample.x = swatch.dataset.canvasX;
-//     posSample.y = swatch.dataset.canvasY;
-//     hueSample.classList.add('load-swatch');
-//     updateCanvas();
-//     hueSample.classList.remove('load-swatch');
-// }
-
-// function getSwatch(ev) {
-//     if (ev.target.classList.contains('btn')) {
-//         let tg = ev.target;
-//         // get the parent .swatch of the clicked button
-//         do {
-//             tg = tg.parentNode;
-//         } while(!tg.classList.contains('swatch'))
-//         let swatch = tg;
-//         if (ev.target.classList.contains('clear')) {
-//             // Btn to delete swatch
-//             swatch.classList.add('cleared');
-//             swatch.addEventListener('transitionend', e => {
-//                 swatch.remove();
-//                 let swatches = swContainer.querySelectorAll('.swatch');
-//                 if (swatches.length === 0) copyList.style.display = 'none';
-//             }, false);
-//         } else if (ev.target.classList.contains('copy')) {
-//             // Btn to copy rbg value to clipboard
-//             let clr = swatch.dataset.bgColor;
-//             toClipboard(clr);
-//         } else if (ev.target.classList.contains('load')) {
-//             // Btn to load the swatch' color in the color picker
-//             loadSwatch(swatch);
-//         } else if (ev.target.classList.contains('cog')) {
-//             displayTools(swatch);
-//         }
-//     }
-// }
-/*
-function displayTools(clickedSwatch){
-    const swatches = swContainer.querySelectorAll('.swatch');
-    swatches.forEach(sw => {
-        if (sw === clickedSwatch) {
-            sw.classList.add('tools');
-        }else{
-            sw.classList.remove('tools');
-        }
-    })
-}
-
-async function toClipboard(src) {
-    let message;
-    let type = typeof(src);
-    if (type === 'string'){
-        // single color
-        message = "Color copied to clipboard";
-    }else{
-        // list of colors
-        // src = src.join(', '); // comma separated list
-        src = src.join('\n');
-        message = "List of colors copied to clipboard";
-    }
-    if (navigator.clipboard) {
-        try {
-            await navigator.clipboard.writeText(src);
-            notif(message);
-        } catch (err) {
-            console.error('Failed to copy: ', err);
-        }
-    } else {
-        // alternative method with `document.execCommand('copy')`
-        const pasteboard = document.createElement('input');
-        pasteboard.setAttribute('readonly', 'readonly');
-        pasteboard.className = 'hidden';
-        pasteboard.value = src;
-        document.body.appendChild(pasteboard);
-        // save & restore user's selection
-        const selected = (document.getSelection().rangeCount > 0) ? document.getSelection().getRangeAt(0) : false;
-        pasteboard.select();
-        const result = document.execCommand('copy');
-        document.body.removeChild(pasteboard);
-        if (selected) {
-            document.getSelection().removeAllRanges();
-            document.getSelection().addRange(selected);
-        }
-        notif(message);
-    }
-}
-
-function exportColorList(e) {
-    const sw = swContainer.querySelectorAll('.swatch');
-    let list = [];
-    sw.forEach(e => {
-        list.push(e.dataset.bgColor);
-    });
-    toClipboard(list);
-}
-*/
-
 function notif(message){
     const notif = document.querySelector('.notif');
     notif.innerText = message;
@@ -283,7 +181,6 @@ function notifUp() {
 /*
 // -------------------------------------- Drag & Drop Swatches
 // reference to the dragged swatch & its index
-let dragSrcEl, dragSwatchIdx;
 
 // Utility functions
 function createPads(arr) {
@@ -429,7 +326,6 @@ let wheelCenter;
 // stores the coordinates of the selected color in the canvas
 let posSample;
 
-// let theSwatches = [];
 getWheelCenter();
 window.addEventListener("load", e => {
 
@@ -447,10 +343,10 @@ window.addEventListener("load", e => {
     customAddEventListener(canvas, 'down', colorStartDrag);
 
     // ----------------------------------------------Color swatches
-    btnNewSwatch.addEventListener('click', addSwatch, false);
+    btnNewSwatch.addEventListener('click', () => new Swatch(colorPicked), false);
     const zob =document.querySelector('.copyList button')
     zob.addEventListener('click', Swatch.exportColorList, false);
     // swContainer.addEventListener('click', getSwatch, false);
-    //swContainer.addEventListener('dragstart', swatchDragStart, false);
-    console.log("Fin de load !")
+    Swatch.container.addEventListener('dragstart', Swatch.swatchDragStart, false);
+    Swatch.container.addEventListener('click', Swatch.getClick, false);
 }, false);
