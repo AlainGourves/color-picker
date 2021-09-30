@@ -325,6 +325,7 @@ let isFlipped = false;
 let wheelCenter;
 // stores the coordinates of the selected color in the canvas
 let posSample;
+let colorSwatches;
 
 getWheelCenter();
 window.addEventListener("load", e => {
@@ -343,10 +344,47 @@ window.addEventListener("load", e => {
     customAddEventListener(canvas, 'down', colorStartDrag);
 
     // ----------------------------------------------Color swatches
-    btnNewSwatch.addEventListener('click', () => new Swatch(colorPicked), false);
-    const zob =document.querySelector('.copyList button')
-    zob.addEventListener('click', Swatch.exportColorList, false);
+    colorSwatches = new Swatches(document.querySelector('#swatches'));
+    btnNewSwatch.addEventListener('click', e => colorSwatches.addSwatch(), false);
+    // btnNewSwatch.addEventListener('click', () => new Swatch(colorPicked), false);
+    // const zob =document.querySelector('.copyList button')
+    // zob.addEventListener('click', Swatch.exportColorList, false);
     // swContainer.addEventListener('click', getSwatch, false);
-    Swatch.container.addEventListener('dragstart', Swatch.swatchDragStart, false);
-    Swatch.container.addEventListener('click', Swatch.getClick, false);
+    // Swatch.container.addEventListener('dragstart', Swatch.swatchDragStart, false);
+    // Swatch.container.addEventListener('click', Swatch.getClick, false);
+    const popu = document.querySelector('#populate')
+    popu.addEventListener('click', populate, false)
 }, false);
+
+function populate() {
+    let objs = [{
+        clr: [74, 142, 201],
+        angle: 208,
+        raw: -152,
+        x: 99,
+        y: 33
+    },
+    {
+        clr: [164,177,29],
+        angle: 65,
+        raw: 65,
+        x: 130,
+        y: 48
+    },
+    {
+        clr: [209,65,142],
+        angle: 328,
+        raw: -32,
+        x: 108,
+        y: 28
+    }];
+    objs.forEach(o => {
+        colorPicked.dataset.colorPicked = `rgb(${o.clr.join(',')})`;
+        colorPicked.dataset.angle = `${o.angle}deg`;
+        colorPicked.dataset.rawAngle = `${o.raw}deg`;
+        colorPicked.dataset.canvasX = o.x;
+        colorPicked.dataset.canvasY = o.y;
+        
+        colorSwatches.addSwatch()
+    })
+}

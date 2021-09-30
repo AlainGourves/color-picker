@@ -73,7 +73,7 @@
     // but not when the swatch is dragged
     &:not(.over)::after {
         position: absolute;
-        content: attr(data-bg-color);
+        content: attr(data-color);
         width: 100%;
         height: $radius;
         bottom: 0;
