@@ -16,6 +16,11 @@ class Swatches {
         this.container.addEventListener('click', this.getClick.bind(this), false);
         // 2) swatches drag&drop
         this.container.addEventListener('dragstart', this.swatchDragStart.bind(this), false);
+        this.container.addEventListener('dragenter', this.swatchDragEnter.bind(this));
+        this.container.addEventListener('dragover', this.swatchDragOver);
+        this.container.addEventListener('dragleave', this.swatchDragLeave);
+        this.container.addEventListener('dragend', this.swatchDragEnd.bind(this));
+        this.container.addEventListener('drop', this.swatchDrop.bind(this));
         // 3) clicks on this.exportBtn
         this.exportBtn.addEventListener('click', this.exportColorList.bind(this), false);
     }
@@ -23,8 +28,8 @@ class Swatches {
     addSwatch() {
         const clone = Swatches.#swatchTemplate.content.firstElementChild.cloneNode(true);
         clone.dataset.color = colorPicked.dataset.colorPicked;
-        clone.dataset.angle = colorPicked.dataset.angle;
-        clone.dataset.rawAngle = colorPicked.dataset.rawAngle;
+        clone.dataset.angle1 = colorPicked.dataset.angle1; // 0-360 deg
+        clone.dataset.angle2 = colorPicked.dataset.angle2; // -180-180 deg
         clone.dataset.x = colorPicked.dataset.canvasX;
         clone.dataset.y = colorPicked.dataset.canvasY;
         // Compute a unique ID for the swatch
@@ -80,18 +85,19 @@ class Swatches {
     }
 
     loadSwatch(sw) {
-        // let prev = parseInt(root.style.getPropertyValue('--hue-rotation'))
-        // let next = parseInt(sw.dataset.angle)
-        // let diff = Math.abs(prev - next)
-        // console.log(prev - next)
-        // if (diff > 180) {
-            // console.log('>> ', next - 360)
-            // root.style.setProperty('--hue-rotation', `${next - 360}deg`);
-        // } else {
-            root.style.setProperty('--hue-rotation', sw.dataset.angle);
-        // }
+        let prev = parseInt(window.getComputedStyle(root).getPropertyValue('--hue-rotation'))
+        let next = parseInt(sw.dataset.angle1)
+        // choose the shortest path beetween previous and next position (= rotation <= 180deg)
+        if (Math.abs(prev - next) > 180) {
+            root.style.setProperty('--hue-rotation', sw.dataset.angle2);
+            root.style.setProperty('--hue-rotation-2', sw.dataset.angle1);
+        } else {
+            root.style.setProperty('--hue-rotation', sw.dataset.angle1);
+            root.style.setProperty('--hue-rotation-2', sw.dataset.angle2);
+        }
         posSample.x = sw.dataset.x;
         posSample.y = sw.dataset.y;
+        // TODO: mettre ce qui suit dans une fonction de la classe ColorPicker
         let theWheel = document.querySelector('#wheel__container');
         theWheel.classList.add('load-swatch');
         updateCanvas();
@@ -169,33 +175,24 @@ class Swatches {
     swatchDragStart(e) {
         this.container.classList.add('dragged');
         if (!this.isPads) this.createPads();
-        this.container.addEventListener('dragenter', this.swatchDragEnter, false);
-        this.container.addEventListener('dragover', this.swatchDragOver, false);
-        this.container.addEventListener('dragleave', this.swatchDragLeave, false);
-        this.container.addEventListener('dragend', this.swatchDragEnd.bind(this), false);
-        this.container.addEventListener('drop', this.swatchDrop.bind(this), false);
         this.draggedSwatch = e.target;
-
 
         this.dataTrans.effectAllowed = 'move';
         this.dataTrans.setData('text/html', this.draggedSwatch.outerHTML);
         this.dataTrans.dropEffect = 'move';
 
+        this.draggedSwatch.classList.add('dragged');
         // Get the index of the dragged swatch
         let swatches = this.listSwatches();
         this.draggedSwatchIdx = Array.from(swatches).findIndex(sw => sw === this.draggedSwatch);
-        console.log('idx début:',this.draggedSwatchIdx)
-        if (this.draggedSwatchIdx !== -1) {
-            this.draggedSwatch.style.opacity = '.4';
-        } else {
-            throw new Error('Index of Swatch not found');
-        }
     }
 
 
     swatchDragEnter(e) {
-        if (e.target.classList.contains('swatch') || e.target.classList.contains('swatch__pad')) {
-            e.target.classList.add('over');
+        if (this.dataTrans.items.length) {
+            if (e.target.classList.contains('swatch') || e.target.classList.contains('swatch__pad')) {
+                e.target.classList.add('over');
+            }
         }
     }
 
@@ -211,24 +208,18 @@ class Swatches {
     }
 
     swatchDragEnd(e) {
-        // remove events listeners
-        this.container.removeEventListener('dragenter', this.swatchDragEnter);
-        this.container.removeEventListener('dragover', this.swatchDragOver);
-        this.container.removeEventListener('dragleave', this.swatchDragLeave);
-        this.container.removeEventListener('dragend', this.swatchDragEnd);
-        this.container.removeEventListener('drop', this.swatchDrop);
+        // console.log('the sw: ', this.draggedSwatch)
         this.postDragCleaning();
     }
 
     swatchDrop(e) {
+        // e.stopPropagation();
         e.preventDefault();
-        e.stopPropagation();
         let swatches = this.listSwatches();
         if (e.target !== this.draggedSwatch) {
-            console.log('idx:', this.draggedSwatchIdx, swatches, e.target)
             if (e.target.classList.contains('swatch')) {
                 // Swatches position are swapped
-                if (this.draggedSwatchIdx !== -1){
+                if (this.draggedSwatchIdx !== -1) {
                     swatches[this.draggedSwatchIdx].outerHTML = e.target.outerHTML;
                     e.target.outerHTML = this.dataTrans.getData('text/html');
                 }
@@ -239,25 +230,21 @@ class Swatches {
                 // `pads` is a nodeList -> convert to array
                 let padIdx = Array.from(pads).findIndex(p => p === e.target);
                 if (padIdx !== -1) {
-                    if (padIdx == swatches.length) {
+                    if (padIdx === swatches.length) {
                         // swatch moved to the end
-                        swatches.appendChild(swatches[this.draggedSwatchIdx]);
+                        this.container.appendChild(swatches[this.draggedSwatchIdx]);
                     } else {
-                        let old = swatches.replaceChild(swatches[this.draggedSwatchIdx], swatches[padIdx]);
-                        if (padIdx >= draggedSwatchIdx) {
-                            swatches.insertBefore(old, swatches[padIdx]);
-                        } else {
-                            swatches.insertBefore(old, swatches[padIdx + 1]);
-                        }
+                        let old = this.container.replaceChild(swatches[this.draggedSwatchIdx], swatches[padIdx]);
+                        // swatches, as a nodeList is immutable : must refresh it to reflect the changes
+                        swatches = this.listSwatches(); 
+                        this.container.insertBefore(old, swatches[padIdx + 1]);
                     }
                 } else {
                     throw new Error('Unknown pad index');
                 }
             }
-        }else{
-            console.log('Hey Ducon !!!!')
         }
-        // this.postDragCleaning();
+        this.postDragCleaning();
     }
 
     // Utility functions
@@ -285,11 +272,10 @@ class Swatches {
     postDragCleaning() {
         // remove 'over' classes
         let swatches = this.listSwatches();
-        swatches.forEach(c => c.classList.remove('over'));
+        swatches.forEach(c => c.classList.remove('over', 'dragged'));
         this.container.classList.remove('dragged');
+        this.dataTrans.clearData();
         if (this.draggedSwatch !== undefined) {
-            console.log('cleaning')
-            this.draggedSwatch.style.opacity = '1';
             this.draggedSwatch = undefined;
             this.draggedSwatchIdx = -1;
             this.deletePads();

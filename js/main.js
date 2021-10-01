@@ -1,3 +1,12 @@
+const root = document.documentElement;
+const wheel = document.querySelector('.wheel');
+const rotationValue = document.querySelector('.hue__rotation-content');
+const hueSample = document.querySelector('.sample');
+const colorPicked = document.querySelector('.picked-color');
+const btnNewSwatch = document.querySelector('#wheel__container > button');
+const canvas = document.querySelector('#canvas');
+const ctx = canvas.getContext('2d');
+
 
 // Handle Hue selection :
 // - hueStartDrag() -> mousedown event (create event listeners for mousemove & mouseend)
@@ -20,7 +29,7 @@ function hueMoveDrag(ev) {
     ev.preventDefault();
     let pos = getPosition(ev);
     let angle = Math.round(Math.atan2(pos.y - wheelCenter.y, pos.x - wheelCenter.x) * (180 / Math.PI));
-    root.style.setProperty('--hue-rotation-raw', `${angle}deg`); // don't forget the 'deg'' unit !
+    root.style.setProperty('--hue-rotation-2', `${angle}deg`); // don't forget the 'deg'' unit !
     if (angle < 0) angle += 360;
     if (angle === -0) angle = 0;
     root.style.setProperty('--hue-rotation', `${angle}deg`); // don't forget the 'deg'' unit !
@@ -54,11 +63,11 @@ function colorMoveDrag(ev) {
     if (posSample.x < 0) posSample.x = 0;
     if (posSample.x > rect.width) posSample.x = rect.width - 1;
     if (posSample.y < 0) posSample.y = 0;
+    function getWheelCenter() {
     if (posSample.y > rect.height) posSample.y = rect.height - 1;
     updateCanvas();
 }
 
-function getWheelCenter() {
     // Compute the coordinates of the wheel's center
     const rect = wheel.getBoundingClientRect();
     wheelCenter = {
@@ -115,8 +124,8 @@ function getPixelColor() {
     let clr = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
     root.style.setProperty('--color-picked', clr);
     colorPicked.dataset.colorPicked = clr;
-    colorPicked.dataset.rawAngle = root.style.getPropertyValue('--hue-rotation-raw');
-    colorPicked.dataset.angle = root.style.getPropertyValue('--hue-rotation');
+    colorPicked.dataset.angle1 = window.getComputedStyle(root).getPropertyValue('--hue-rotation').trim(); // 0-360 deg
+    colorPicked.dataset.angle2 = window.getComputedStyle(root).getPropertyValue('--hue-rotation-2').trim(); //-180 180 deg
     colorPicked.dataset.canvasX = posSample.x;
     colorPicked.dataset.canvasY = posSample.y;
 }
@@ -136,7 +145,8 @@ function drawCircle() {
 
 function updateCanvas() {
     // display hue rotation value
-    let angle = getComputedStyle(root).getPropertyValue('--hue-rotation');
+    let angle = window.getComputedStyle(root).getPropertyValue('--hue-rotation-2');
+    if (parseInt(angle) < 0) angle = `${parseInt(angle) + 360}deg`;
     rotationValue.innerText = angle.replace('deg','°');
     let clr = window.getComputedStyle(canvas).backgroundColor;
     // erase canvas
@@ -162,172 +172,13 @@ function updateCanvas() {
     getPixelColor()
 }
 
-// ----------------------------------------------Color swatches
-const swContainer = document.querySelector('.swatches__container');
-const copyList = document.querySelector('.copyList');
-
-function notif(message){
-    const notif = document.querySelector('.notif');
-    notif.innerText = message;
-    notif.classList.add('visible');
-    notif.addEventListener('transitionend', notifUp, false)
-}
-
-function notifUp() {
-    this.classList.remove('visible');
-    this.removeEventListener('transitionend', notifUp);
-}
-
-/*
-// -------------------------------------- Drag & Drop Swatches
-// reference to the dragged swatch & its index
-
-// Utility functions
-function createPads(arr) {
-    // arr => array of swatches
-    // place a landing pad before every swatch
-    arr.forEach(sw => {
-        const pad = document.createElement('div');
-        pad.className = 'swatch__pad';
-        swContainer.insertBefore(pad, sw);
-    });
-    // and one last at the end
-    const pad = document.createElement('div');
-    pad.className = 'swatch__pad last';
-    swContainer.append(pad);
-}
-
-function deletePads() {
-    let pads = swContainer.querySelectorAll('.swatch__pad');
-    pads.forEach(p => {
-        p.remove();
-    });
-}
-
-function afterDragCleaning() {
-    deletePads();
-    if (dragSrcEl !== undefined) {
-        dragSrcEl.style.opacity = '1';
-        dragSrcEl = undefined;
-    }
-    swContainer.classList.remove('dragged');
-    // remove 'over' classes
-    swContainer.querySelectorAll('.swatch').forEach(c => c.classList.remove('over'));
-}
-
-// Drag & Drop functions -----------------------------
-function swatchDragStart(e) {
-    swContainer.classList.add('dragged');
-    let swatches = swContainer.querySelectorAll('.swatch');
-    if (!swContainer.querySelectorAll('.swatch__pad').length) {
-        createPads(swatches);
-    }
-    swContainer.addEventListener('dragenter', swatchDragEnter, false);
-    swContainer.addEventListener('dragover', swatchDragOver, false);
-    swContainer.addEventListener('dragleave', swatchDragLeave, false);
-    swContainer.addEventListener('dragend', swatchDragEnd, false);
-    swContainer.addEventListener('drop', swatchDrop, false);
-
-    dragSrcEl = e.target;
-
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.dropEffect = 'move';
-    e.dataTransfer.setData('text/html', dragSrcEl.outerHTML);
-
-    // Get the index of the dragged swatch
-    swatches.forEach((s, idx) => {
-        if (s === dragSrcEl) {
-            dragSwatchIdx = idx;
-        }
-    })
-
-    dragSrcEl.style.opacity = '.4';
-}
-
-function swatchDragEnter(e) {
-    if (e.target.classList.contains('swatch') || e.target.classList.contains('swatch__pad')) {
-        e.target.classList.add('over');
-    }
-}
-
-function swatchDragOver(e) {
-    // necessary to make the drop event possible !!
-    e.preventDefault();
-}
-
-function swatchDragLeave(e) {
-    if (e.target.classList.contains('swatch') || e.target.classList.contains('swatch__pad')) {
-        e.target.classList.remove('over');
-    }
-}
-
-function swatchDragEnd(e) {
-    // remove events listeners
-    swContainer.removeEventListener('dragenter', swatchDragEnter);
-    swContainer.removeEventListener('dragover', swatchDragOver);
-    swContainer.removeEventListener('dragleave', swatchDragLeave);
-    swContainer.removeEventListener('dragend', swatchDragEnd);
-    swContainer.removeEventListener('drop', swatchDrop);
-
-    afterDragCleaning();
-}
-
-function swatchDrop(e) {
-    e.preventDefault();
-    if (e.target !== dragSrcEl) {
-        let swatches = swContainer.getElementsByClassName('swatch');
-        // Uses `getElementsByClassName()` to create a live nodelist (vs. 'static')
-        // cf. https://developer.mozilla.org/en-US/docs/Web/API/NodeList
-        let swLenght = swatches.length;
-        if (e.target.classList.contains('swatch')) {
-            // Swatwhes position are swapped
-            swatches[dragSwatchIdx].outerHTML = e.target.outerHTML;
-            e.target.outerHTML = e.dataTransfer.getData('text/html');
-        } else if (e.target.classList.contains('swatch__pad')) {
-            // Swatch was dropped on a pad
-            let padIdx;
-            // get dropped pad idx
-            let pads = swContainer.querySelectorAll('.swatch__pad');
-            pads.forEach((p, idx) => {
-                if (p === e.target) padIdx = idx
-            });
-
-            if (padIdx == swLenght) {
-                // swatch moved to the end
-                swContainer.appendChild(swatches[dragSwatchIdx]);
-            } else {
-                let old = swContainer.replaceChild(swatches[dragSwatchIdx], swatches[padIdx]);
-                if (padIdx >= dragSwatchIdx) {
-                    swContainer.insertBefore(old, swatches[padIdx]);
-                } else {
-                    swContainer.insertBefore(old, swatches[padIdx + 1]);
-                }
-            }
-        }
-    }
-    afterDragCleaning();
-}
-*/
-// ----------------------------------------------Page Load
-const root = document.documentElement;
-const wheel = document.querySelector('.wheel');
-const rotationValue = document.querySelector('.hue__rotation-content');
-const hueSample = document.querySelector('.sample');
-const colorPicked = document.querySelector('.picked-color');
-const btnNewSwatch = document.querySelector('#wheel__container > button');
-const canvas = document.querySelector('#canvas');
-const ctx = canvas.getContext('2d');
-
-// handle the hue rotation value text flipping around the wheel
-let isFlipped = false;
-
 // stores the coordinates of the wheel's center (to cumpute the angle of rotation)
 let wheelCenter;
+getWheelCenter();
 // stores the coordinates of the selected color in the canvas
 let posSample;
 let colorSwatches;
 
-getWheelCenter();
 window.addEventListener("load", e => {
 
     canvas.width = parseInt(window.getComputedStyle(canvas).width);
@@ -346,15 +197,26 @@ window.addEventListener("load", e => {
     // ----------------------------------------------Color swatches
     colorSwatches = new Swatches(document.querySelector('#swatches'));
     btnNewSwatch.addEventListener('click', e => colorSwatches.addSwatch(), false);
-    // btnNewSwatch.addEventListener('click', () => new Swatch(colorPicked), false);
-    // const zob =document.querySelector('.copyList button')
-    // zob.addEventListener('click', Swatch.exportColorList, false);
-    // swContainer.addEventListener('click', getSwatch, false);
-    // Swatch.container.addEventListener('dragstart', Swatch.swatchDragStart, false);
-    // Swatch.container.addEventListener('click', Swatch.getClick, false);
+ 
     const popu = document.querySelector('#populate')
     popu.addEventListener('click', populate, false)
 }, false);
+
+
+
+// ----------------------------------------------Utility functions
+function notif(message){
+    const notif = document.querySelector('.notif');
+    notif.innerText = message;
+    notif.classList.add('visible');
+    notif.addEventListener('transitionend', notifUp, false)
+}
+
+function notifUp() {
+    this.classList.remove('visible');
+    this.removeEventListener('transitionend', notifUp);
+}
+
 
 function populate() {
     let objs = [{
@@ -377,11 +239,18 @@ function populate() {
         raw: -32,
         x: 108,
         y: 28
+    },
+    {
+        clr: [203,94,26],
+        angle: 23,
+        raw: 23,
+        x: 137,
+        y: 32
     }];
     objs.forEach(o => {
         colorPicked.dataset.colorPicked = `rgb(${o.clr.join(',')})`;
-        colorPicked.dataset.angle = `${o.angle}deg`;
-        colorPicked.dataset.rawAngle = `${o.raw}deg`;
+        colorPicked.dataset.angle1 = `${o.angle}deg`;
+        colorPicked.dataset.angle2 = `${o.raw}deg`;
         colorPicked.dataset.canvasX = o.x;
         colorPicked.dataset.canvasY = o.y;
         
