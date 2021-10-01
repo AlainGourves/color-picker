@@ -63,11 +63,11 @@ function colorMoveDrag(ev) {
     if (posSample.x < 0) posSample.x = 0;
     if (posSample.x > rect.width) posSample.x = rect.width - 1;
     if (posSample.y < 0) posSample.y = 0;
+    function getWheelCenter() {
     if (posSample.y > rect.height) posSample.y = rect.height - 1;
     updateCanvas();
 }
 
-function getWheelCenter() {
     // Compute the coordinates of the wheel's center
     const rect = wheel.getBoundingClientRect();
     wheelCenter = {
