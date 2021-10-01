@@ -1,9 +1,4 @@
 /* ------------------- Color swatches -- */
-:root{
-
-    --pad-width: 6px;
-}
-
 #swatches {
     margin-bottom: 3em;
 }
@@ -16,7 +11,7 @@
     position: relative;
     padding: 1em;
     gap: 1em;
-    transition: gap var(--transition);
+    // transition: gap var(--transition);
 
     &.dragged {
         gap: 1em calc((1em - var(--pad-width)) / 2);
@@ -42,6 +37,10 @@
 
     &:hover {
         z-index: 12;
+    }
+
+    &.dragged{
+        opacity: .4;
     }
 
     // show/hide tools btns
