@@ -33,7 +33,8 @@ function hueEndDrag() {
     customRemoveEventListener(document.body, 'move', hueMoveDrag);
     customRemoveEventListener(document.body, 'up', hueEndDrag);
     if (reqAnimID) {
-        cancelAnimationFrame(reqAnimID)
+        cancelAnimationFrame(reqAnimID);
+        reqAnimID = null;
     };
 }
 
@@ -63,7 +64,8 @@ function colorEndDrag() {
     customRemoveEventListener(document.body, 'move', colorMoveDrag);
     customRemoveEventListener(document.body, 'up', colorEndDrag);
     if (reqAnimID) {
-        cancelAnimationFrame(reqAnimID)
+        cancelAnimationFrame(reqAnimID);
+        reqAnimID = null;
     };
 }
 
@@ -157,10 +159,7 @@ function drawCircle() {
     ctx.stroke();
 }
 
-const updateCanvas = function (timeStamp) {
-    if (timeStamp) {
-        console.log('t:', timeStamp)
-    }
+const updateCanvas = function () {
     // display hue rotation value
     rotationValue.innerText = getComputedStyle(root).getPropertyValue('--hue-rotation')
     let clr = window.getComputedStyle(canvas).backgroundColor;
@@ -185,7 +184,9 @@ const updateCanvas = function (timeStamp) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawCircle();
     getPixelColor()
-    // reqAnimID = requestAnimationFrame(updateCanvas);
+    if (reqAnimID) {
+        reqAnimID = requestAnimationFrame(updateCanvas);
+    }
 }
 
 // ----------------------------------------------Color swatches
