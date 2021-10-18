@@ -6,7 +6,7 @@ const colorPicked = document.querySelector('.picked-color');
 const btnNewSwatch = document.querySelector('#wheel__container > button');
 const canvas = document.querySelector('#canvas');
 let ctx;
-
+let reqAnimID = null;
 
 // handle the hue rotation value text flipping around the wheel
 let isFlipped = false;
@@ -30,8 +30,11 @@ function hueStartDrag(ev) {
 }
 
 function hueEndDrag() {
-    customRemoveEventListener(document.body, 'move', hueMoveDrag)
-    customRemoveEventListener(document.body, 'up', hueEndDrag)
+    customRemoveEventListener(document.body, 'move', hueMoveDrag);
+    customRemoveEventListener(document.body, 'up', hueEndDrag);
+    if (reqAnimID) {
+        cancelAnimationFrame(reqAnimID)
+    };
 }
 
 function hueMoveDrag(ev) {
@@ -41,8 +44,8 @@ function hueMoveDrag(ev) {
     if (angle < 0) angle += 360;
     if (angle === -0) angle = 0;
     root.style.setProperty('--hue-rotation', `${angle}deg`); // don't forget the 'deg'' unit !
-    
-    updateCanvas();
+
+    reqAnimID = requestAnimationFrame(updateCanvas);
 }
 
 // Handle Color selection on the canvas element :
@@ -57,8 +60,11 @@ function colorStartDrag(ev) {
 }
 
 function colorEndDrag() {
-    customRemoveEventListener(document.body, 'move', colorMoveDrag)
-    customRemoveEventListener(document.body, 'up', colorEndDrag)
+    customRemoveEventListener(document.body, 'move', colorMoveDrag);
+    customRemoveEventListener(document.body, 'up', colorEndDrag);
+    if (reqAnimID) {
+        cancelAnimationFrame(reqAnimID)
+    };
 }
 
 function colorMoveDrag(ev) {
@@ -73,10 +79,10 @@ function colorMoveDrag(ev) {
     if (posSample.x > rect.width) posSample.x = rect.width - 1;
     if (posSample.y < 0) posSample.y = 0;
     if (posSample.y > rect.height) posSample.y = rect.height - 1;
-    updateCanvas();
+    reqAnimID = requestAnimationFrame(updateCanvas);
 }
 
-function getWheelCenter(){
+function getWheelCenter() {
     // Compute the coordinates of the wheel's center
     const rect = wheel.getBoundingClientRect();
     wheelCenter = {
@@ -151,7 +157,10 @@ function drawCircle() {
     ctx.stroke();
 }
 
-function updateCanvas() {
+const updateCanvas = function (timeStamp) {
+    if (timeStamp) {
+        console.log('t:', timeStamp)
+    }
     // display hue rotation value
     rotationValue.innerText = getComputedStyle(root).getPropertyValue('--hue-rotation')
     let clr = window.getComputedStyle(canvas).backgroundColor;
@@ -176,6 +185,7 @@ function updateCanvas() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawCircle();
     getPixelColor()
+    // reqAnimID = requestAnimationFrame(updateCanvas);
 }
 
 // ----------------------------------------------Color swatches
@@ -194,7 +204,7 @@ function addSwatch(ev) {
     if (!copyList.style.display || copyList.style.display === 'none') copyList.style.display = 'block';
 }
 
-function loadSwatch(swatch){
+function loadSwatch(swatch) {
     let angle = swatch.dataset.angle;
     root.style.setProperty('--hue-rotation', angle);
     posSample.x = swatch.dataset.canvasX;
@@ -210,7 +220,7 @@ function getSwatch(ev) {
         // get the parent .swatch of the clicked button
         do {
             tg = tg.parentNode;
-        } while(!tg.classList.contains('swatch'))
+        } while (!tg.classList.contains('swatch'))
         let swatch = tg;
         if (ev.target.classList.contains('clear')) {
             // Btn to delete swatch
@@ -233,12 +243,12 @@ function getSwatch(ev) {
     }
 }
 
-function displayTools(clickedSwatch){
+function displayTools(clickedSwatch) {
     const swatches = swContainer.querySelectorAll('.swatch');
     swatches.forEach(sw => {
         if (sw === clickedSwatch) {
             sw.classList.add('tools');
-        }else{
+        } else {
             sw.classList.remove('tools');
         }
     })
@@ -246,11 +256,11 @@ function displayTools(clickedSwatch){
 
 async function toClipboard(src) {
     let message;
-    let type = typeof(src);
-    if (type === 'string'){
+    let type = typeof (src);
+    if (type === 'string') {
         // single color
         message = "Color copied to clipboard";
-    }else{
+    } else {
         // list of colors
         // src = src.join(', '); // comma separated list
         src = src.join('\n');
@@ -292,7 +302,7 @@ function exportColorList(e) {
     toClipboard(list);
 }
 
-function notif(message){
+function notif(message) {
     const notif = document.querySelector('.notif');
     notif.innerText = message;
     notif.classList.add('visible');
